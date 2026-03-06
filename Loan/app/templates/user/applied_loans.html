@@ -1,0 +1,85 @@
+{% extends "user/base_user.html" %}
+{% load static %}
+
+{% block title %}Applied Loans{% endblock %}
+
+{% block extra_css %}
+<style>
+    .content { background: var(--card-bg); padding: 24px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06); }
+    .content h2 { text-align: left; margin-bottom: 20px; color: var(--primary-color); }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
+    th { background-color: #21474b; color: white; }
+    tr:hover { background-color: #f5f5f5; }
+    .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-block; }
+    .status-pending { background: rgba(255, 193, 7, 0.2); color: #b8860b; }
+    .status-rejected { background: rgba(220, 53, 69, 0.15); color: var(--danger); }
+    .status-under-review { background: rgba(33, 71, 75, 0.15); color: var(--primary-color); }
+    .action-pill { padding: 6px 12px; border-radius: 16px; background: var(--secondary-color); color: white; display: inline-block; }
+    .action-pill.gray { background: #6c757d; }
+    .na-text { color: #6c757d; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <h2 >Applied Loans</h2>
+        <table id="appliedLoansTable">
+            <thead>
+                <tr>
+                    <th>Serial Number</th>
+                    <th>Loan ID</th>
+                    <th>Loan Type</th>
+                    <th>Interest Rate (% p.a.)</th>
+                    <th>Duration</th>
+                    <th>Loan Amount</th>
+                    <th>Applied Date</th>
+                    <th>Status</th>
+                    <th>Reason</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyApplied">
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let id = "{{ id|default:'' }}";
+function statusBadge(status) {
+    const s = (status || '').trim();
+    if (s === 'Rejected') return '<span class="status-badge status-rejected">Rejected</span>';
+    if (s === 'Applied' || s === 'Pending') return '<span class="status-badge status-pending">Pending</span>';
+    return '<span class="status-badge status-under-review">Under Review</span>';
+}
+function renderApplied(loans) {
+    let rows = '';
+    let i = 1;
+    loans.forEach(function(loan) {
+        const reason = loan.status === 'Rejected' ? (loan.rejection_reason || 'Rejected by admin') : '';
+        const action = loan.status === 'Rejected' ? '<span class="action-pill gray">View</span>' : '<span class="action-pill">Under Review</span>';
+        rows += '<tr>' +
+            '<td>' + (i++) + '</td>' +
+            '<td>#' + (loan.loan_number || loan.id) + '</td>' +
+            '<td>' + (loan.loan_details || loan.loan_type || 'Personal') + '</td>' +
+            '<td>' + (loan.interest_rate || '') + '</td>' +
+            '<td>' + loan.duration + ' months</td>' +
+            '<td>₹' + loan.amount + '</td>' +
+            '<td>' + (loan.start_date || '') + '</td>' +
+            '<td>' + statusBadge(loan.status) + '</td>' +
+            '<td>' + (reason || '<span class="na-text">—</span>') + '</td>' +
+            '<td>' + action + '</td>' +
+        '</tr>';
+    });
+    document.getElementById('tbodyApplied').innerHTML = rows;
+}
+fetch('/getApprovedLoans?id=' + id).then(function(view) { return view.json(); }).then(function(view) {
+    const all = view.data || [];
+    const appliedStates = ['Applied','Pending','Rejected'];
+    const filtered = all.filter(function(l) { return appliedStates.indexOf((l.status || '').trim()) !== -1; });
+    renderApplied(filtered);
+});
+</script>
+{% endblock %}

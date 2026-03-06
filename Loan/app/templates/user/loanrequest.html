@@ -1,0 +1,473 @@
+{% extends "user/base_user.html" %}
+{% load static %}
+{# Real-world Loan Request form: structured loan + dynamic surety sections (auth & core loan logic unchanged). #}
+
+{% block title %}Apply for a Loan{% endblock %}
+
+{% block extra_css %}
+<style>
+  .loan-form-wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .loan-form-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    padding: 24px 28px 28px 28px;
+    border: 1px solid #e3e7ea;
+  }
+  .section-title { font-weight: 600; margin-top: 24px; margin-bottom: 8px; color: #21474b; }
+  .field-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .field-row > div { flex: 1 1 220px; }
+  .hidden-section { display: none; }
+  label { display:block; margin-bottom:4px; font-weight:500; color:#34495e; font-size:0.92rem; }
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    font-size: 0.9rem;
+  }
+  textarea { resize: vertical; }
+  .btn-submit {
+    background: linear-gradient(135deg, #1a4a5a, #2b7a78);
+    border: none;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .btn-submit:hover { opacity: 0.97; color:#fff; }
+  @media (max-width: 768px) {
+    .loan-form-card { padding: 18px 16px 22px 16px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="loan-form-wrapper">
+  <div class="loan-form-card">
+    <h3 style="margin-bottom: 10px; color:#1a4a5a; font-weight:600;">Apply for a Loan</h3>
+    <p style="margin-bottom: 18px; font-size:0.9rem; color:#6c757d;">
+      Provide accurate details for faster processing of your loan request. All fields in each section help us to assess eligibility and risk similar to a banking workflow.
+    </p>
+<form id="loanForm" action="{% url 'loanrequest' %}" method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="hidden" name="userid" id="userIdHidden">
+
+  <!-- A. BASIC LOAN DETAILS -->
+  <h4 class="section-title">Basic Loan Details</h4>
+  <div class="field-row">
+    <div>
+      <label>Loan Type</label>
+      <select name="loan_type" id="loanType" required>
+        <option value="">Select</option>
+        <option value="Personal">Personal</option>
+        <option value="Home">Loan Against Property</option>
+        <option value="Education">Education</option>
+        <option value="Agriculture">Agriculture</option>
+      </select>
+    </div>
+    <div>
+      <label>Loan Amount</label>
+      <input type="number" name="amount" id="amountTobe" min="10000" step="1000" required />
+    </div>
+    <div>
+      <label>Loan Duration (months)</label>
+      <input type="number" name="duration" id="durationMonths" min="6" max="360" required />
+    </div>
+    <div>
+      <label>Interest Rate (% p.a.)</label>
+      <input type="number" name="interest_rate" id="interestRate" readonly />
+    </div>
+    <div>
+      <label>Monthly EMI</label>
+      <input type="number" name="monthlyamount" id="MonthlyPay" readonly />
+    </div>
+  </div>
+
+  <div class="field-row" style="margin-top:12px;">
+    <div style="flex:1 1 100%;">
+      <label>Purpose of Loan</label>
+      <textarea name="purpose" rows="3" required></textarea>
+    </div>
+  </div>
+
+  <!-- B. SURETY TYPE -->
+  <h4 class="section-title">Surety Details</h4>
+  <div class="field-row" style="display:none;">
+    <div>
+      <label>Surety Type</label>
+      <select name="surety_type" id="suretyType">
+        <option value="">Select</option>
+        <option value="income">Income Based</option>
+        <option value="guarantor">Guarantor Based</option>
+        <option value="asset">Asset Based</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- B2. AGRICULTURE SPECIFIC -->
+  <div id="agricultureSection" class="hidden-section">
+    <div class="field-row">
+      <div>
+        <label>Farmer Type</label>
+        <select name="farmer_type" id="farmerType">
+          <option value="">Select</option>
+          <option value="Land Owner">Land Owner</option>
+          <option value="Tenant Farmer">Tenant Farmer</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- C. INCOME-BASED -->
+  <div id="incomeSection" class="hidden-section">
+    <h5 class="section-title">Income-based Surety</h5>
+    <div class="field-row">
+      <div>
+        <label>Employment Type</label>
+        <select name="income_employment_type">
+          <option value="">Select</option>
+          <option value="Salaried">Salaried</option>
+          <option value="Self-Employed">Self-Employed</option>
+        </select>
+      </div>
+      <div>
+        <label>Annual Income</label>
+        <input type="number" name="income_annual" id="incomeAnnual" min="0" step="1000" />
+      </div>
+      <div>
+        <label>Monthly Income</label>
+        <input type="number" name="income_monthly" id="incomeMonthly" readonly />
+      </div>
+    </div>
+    <div class="field-row">
+      <div>
+        <label>Employer / Business Name</label>
+        <input type="text" name="income_employer_name" />
+      </div>
+      <div>
+        <label>Years of Employment / Business</label>
+        <input type="number" name="income_years_employment" min="0" />
+      </div>
+      <div>
+        <label>Income Proof Upload</label>
+        <input type="file" name="income_proof" accept=".pdf,.jpg,.jpeg,.png" />
+      </div>
+    </div>
+  </div>
+
+  <!-- D. GUARANTOR-BASED -->
+  <div id="guarantorSection" class="hidden-section">
+    <h5 class="section-title">Guarantor-based Surety</h5>
+    <div class="field-row">
+      <div><label>Guarantor Full Name</label><input type="text" name="guarantor_name" /></div>
+      <div><label>Relationship with Applicant</label><input type="text" name="guarantor_relationship" /></div>
+      <div><label>Guarantor PAN Number</label><input type="text" name="guarantor_pan" /></div>
+    </div>
+    <div class="field-row">
+      <div><label>Guarantor Mobile Number</label><input type="text" name="guarantor_mobile" /></div>
+      <div><label>Guarantor Address</label><input type="text" name="guarantor_address" /></div>
+    </div>
+    <div class="field-row">
+      <div>
+        <label>Employment Type</label>
+        <select name="guarantor_employment_type">
+          <option value="">Select</option>
+          <option value="Salaried">Salaried</option>
+          <option value="Self-Employed">Self-Employed</option>
+        </select>
+      </div>
+      <div><label>Annual Income</label><input type="number" name="guarantor_annual_income" id="guarantorAnnual" min="0" step="1000" /></div>
+      <div><label>Monthly Income</label><input type="number" name="guarantor_monthly_income" id="guarantorMonthly" readonly /></div>
+    </div>
+    <div class="field-row">
+      <div><label>Employer / Business Name</label><input type="text" name="guarantor_employer_name" /></div>
+      <div><label>Years of Employment / Business</label><input type="number" name="guarantor_years_employment" min="0" /></div>
+      <div><label>Income Proof Upload</label><input type="file" name="guarantor_income_proof" accept=".pdf,.jpg,.jpeg,.png" /></div>
+    </div>
+  </div>
+
+  <!-- E. ASSET-BASED -->
+  <div id="assetSection" class="hidden-section">
+    <h5 class="section-title">Asset-based Surety <span style="font-size:0.9rem;color:#dc3545;">(Offline Verification Required)</span></h5>
+    <div class="field-row">
+      <div>
+        <label>Asset Type</label>
+        <select name="asset_type" id="assetType">
+          <option value="">Select</option>
+          <option value="Home">Home</option>
+          <option value="Land">Land</option>
+          <option value="Gold">Gold</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="assetHomeSection" class="hidden-section">
+      <div class="field-row">
+        <div><label>Property Address</label><input type="text" name="asset_home_address" /></div>
+        <div><label>Estimated Property Value</label><input type="number" name="asset_home_value" min="0" step="10000" /></div>
+        <div><label>Ownership Proof Upload</label><input type="file" name="asset_home_proof" accept=".pdf,.jpg,.jpeg,.png" /></div>
+      </div>
+    </div>
+
+    <div id="assetGoldSection" class="hidden-section">
+      <div class="field-row">
+        <div><label>Gold Weight (grams)</label><input type="number" name="asset_gold_weight" min="0" step="0.1" /></div>
+        <div><label>Gold Purity</label><input type="text" name="asset_gold_purity" /></div>
+        <div><label>Estimated Gold Value</label><input type="number" name="asset_gold_value" min="0" step="1000" /></div>
+        <div><label>Gold Proof Upload</label><input type="file" name="asset_gold_proof" accept=".pdf,.jpg,.jpeg,.png" /></div>
+      </div>
+    </div>
+    <div id="assetEquipmentSection" class="hidden-section">
+      <div class="field-row">
+        <div><label>Equipment Type</label><input type="text" name="equipment_type" /></div>
+        <div><label>Equipment Model</label><input type="text" name="equipment_model" /></div>
+        <div><label>Estimated Asset Value</label><input type="number" name="equipment_value" min="0" step="1000" /></div>
+        <div><label>Owner Proof Upload</label><input type="file" name="equipment_proof" accept=".pdf,.jpg,.jpeg,.png" /></div>
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" class="btn-submit" style="margin-top:24px;">
+    <i class="fas fa-paper-plane"></i> Submit Request
+  </button>
+</form>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Preserve original sessionStorage -> hidden user id bridging.
+  var sessionUserId = "{{ id|default:'' }}";
+  if (sessionUserId) {
+    sessionStorage.setItem('user', sessionUserId);
+    document.getElementById('userIdHidden').value = sessionUserId;
+  }
+
+  const loanTypeEl = document.getElementById('loanType');
+  const amountEl = document.getElementById('amountTobe');
+  const durationEl = document.getElementById('durationMonths');
+  const rateEl = document.getElementById('interestRate');
+  const emiEl = document.getElementById('MonthlyPay');
+
+  function getRateForType(type) {
+    if (type === 'Home') return 9.0;
+    if (type === 'Education') return 7.0;
+    if (type === 'Agriculture') return 4.0;
+    return 10.0; // Personal default
+  }
+
+  function recalcEMI() {
+    const P = parseFloat(amountEl.value || 0);
+    const n = parseInt(durationEl.value || 0, 10);
+    const r_annual = parseFloat(rateEl.value || 0);
+    if (!P || !n || !r_annual) {
+      emiEl.value = '';
+      return;
+    }
+    const r = r_annual / 12 / 100.0;
+    const factor = Math.pow(1 + r, n);
+    const emi = (P * r * factor) / (factor - 1);
+    emiEl.value = isFinite(emi) ? emi.toFixed(2) : '';
+  }
+
+  loanTypeEl.addEventListener('change', function () {
+    const t = this.value;
+    rateEl.value = getRateForType(t);
+    recalcEMI();
+  });
+  amountEl.addEventListener('input', recalcEMI);
+  durationEl.addEventListener('input', recalcEMI);
+
+  // Surety dynamic sections
+  const suretyEl = document.getElementById('suretyType');
+  const incomeSec = document.getElementById('incomeSection');
+  const guarSec = document.getElementById('guarantorSection');
+  const assetSec = document.getElementById('assetSection');
+  const agriSec = document.getElementById('agricultureSection');
+  const farmerTypeEl = document.getElementById('farmerType');
+  const assetTypeEl = document.getElementById('assetType');
+  const assetHomeSec = document.getElementById('assetHomeSection');
+  const assetGoldSec = document.getElementById('assetGoldSection');
+
+  function updateSuretyVisibility() {
+    const v = suretyEl.value;
+    incomeSec.style.display = (v === 'income') ? 'block' : 'none';
+    guarSec.style.display = (v === 'guarantor') ? 'block' : 'none';
+    assetSec.style.display = (v === 'asset') ? 'block' : 'none';
+  }
+  function updateAssetVisibility() {
+    const v = assetTypeEl.value;
+    assetHomeSec.style.display = (v === 'Home' || v === 'Land') ? 'block' : 'none';
+    assetGoldSec.style.display = (v === 'Gold') ? 'block' : 'none';
+    const assetEquipSec = document.getElementById('assetEquipmentSection');
+    assetEquipSec.style.display = (v === 'Equipment') ? 'block' : 'none';
+    const eqInputs = assetEquipSec.querySelectorAll('input[name=\"equipment_type\"], input[name=\"equipment_model\"], input[name=\"equipment_value\"], input[name=\"equipment_proof\"]');
+    eqInputs.forEach(inp => { inp.required = (v === 'Equipment'); });
+    const goldInputs = assetGoldSec.querySelectorAll('input[name=\"asset_gold_weight\"], input[name=\"asset_gold_purity\"], input[name=\"asset_gold_value\"], input[name=\"asset_gold_proof\"]');
+    goldInputs.forEach(inp => {
+      const isGold = (v === 'Gold');
+      inp.required = isGold;
+      inp.disabled = !isGold;
+      if (!isGold && inp.type !== 'file') { try { inp.value = ''; } catch(e){} }
+    });
+    const homeInputs = assetHomeSec.querySelectorAll('input[name=\"asset_home_address\"], input[name=\"asset_home_value\"], input[name=\"asset_home_proof\"]');
+    homeInputs.forEach(inp => {
+      const isHome = (v === 'Home' || v === 'Land');
+      inp.required = isHome;
+      inp.disabled = !isHome;
+      if (!isHome && inp.type !== 'file') { try { inp.value = ''; } catch(e){} }
+    });
+    const submitBtn = document.querySelector('button[type=\"submit\"]');
+    if (submitBtn) submitBtn.disabled = false;
+  }
+  function updateSuretyByLoanType() {
+    const t = loanTypeEl.value;
+    agriSec.style.display = 'none';
+    incomeSec.style.display = 'none';
+    guarSec.style.display = 'none';
+    assetSec.style.display = 'none';
+    // Reset asset type options per context
+    if (assetTypeEl) {
+      while (assetTypeEl.options.length) assetTypeEl.remove(0);
+      const optDefault = new Option('Select', '');
+      assetTypeEl.add(optDefault);
+    }
+    if (t === 'Personal') {
+      suretyEl.value = 'income';
+      incomeSec.style.display = 'block';
+      // Default asset types for non-agriculture not needed
+    } else if (t === 'Education') {
+      suretyEl.value = 'guarantor';
+      guarSec.style.display = 'block';
+    } else if (t === 'Home') {
+      suretyEl.value = 'asset';
+      incomeSec.style.display = 'block';
+      assetSec.style.display = 'block';
+      assetTypeEl && assetTypeEl.add(new Option('Home', 'Home'));
+      assetTypeEl && assetTypeEl.add(new Option('Land', 'Land'));
+      assetTypeEl && assetTypeEl.add(new Option('Gold', 'Gold'));
+      if (assetTypeEl) { assetTypeEl.value = 'Home'; }
+      const addr = document.querySelector('input[name="asset_home_address"]');
+      const val = document.querySelector('input[name="asset_home_value"]');
+      const incAnn = document.getElementById('incomeAnnual');
+      if (addr) addr.required = true;
+      if (val) val.required = true;
+      if (incAnn) incAnn.required = true;
+    } else if (t === 'Agriculture') {
+      agriSec.style.display = 'block';
+      const ft = farmerTypeEl.value || 'Land Owner';
+      if (ft === 'Tenant Farmer') {
+        suretyEl.value = 'guarantor';
+        guarSec.style.display = 'block';
+        assetSec.style.display = 'none';
+      } else {
+        suretyEl.value = 'asset';
+        assetSec.style.display = 'block';
+      assetTypeEl && assetTypeEl.add(new Option('Land', 'Land'));
+      assetTypeEl && assetTypeEl.add(new Option('Equipment', 'Equipment'));
+      }
+    } else {
+      suretyEl.value = '';
+    }
+    updateAssetVisibility();
+  }
+  suretyEl.addEventListener('change', updateSuretyVisibility);
+  assetTypeEl.addEventListener('change', updateAssetVisibility);
+  loanTypeEl.addEventListener('change', updateSuretyByLoanType);
+  farmerTypeEl && farmerTypeEl.addEventListener('change', updateSuretyByLoanType);
+  updateSuretyByLoanType();
+
+  // Annual -> Monthly income auto-calc
+  const incAnnual = document.getElementById('incomeAnnual');
+  const incMonthly = document.getElementById('incomeMonthly');
+  const gAnnual = document.getElementById('guarantorAnnual');
+  const gMonthly = document.getElementById('guarantorMonthly');
+
+  function annualToMonthly(src, dest) {
+    const val = parseFloat(src.value || 0);
+    dest.value = val ? (val / 12).toFixed(2) : '';
+  }
+  incAnnual && incAnnual.addEventListener('input', () => annualToMonthly(incAnnual, incMonthly));
+  gAnnual && gAnnual.addEventListener('input', () => annualToMonthly(gAnnual, gMonthly));
+
+  const formEl = document.getElementById('loanForm');
+  if (formEl) {
+    const submitBtn = formEl.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function() {
+        console.log('[DEBUG] Submit button clicked; disabled =', submitBtn.disabled, '; assetType =', assetTypeEl && assetTypeEl.value);
+      });
+    }
+    formEl.addEventListener('submit', function (e) {
+      console.log('[DEBUG] Submit handler invoked');
+      const t = loanTypeEl.value;
+      if (t === 'Home') {
+        const asset = assetTypeEl.value;
+        const incAnn = document.getElementById('incomeAnnual');
+        if (!(incAnn && incAnn.value.trim().length > 0)) {
+          e.preventDefault();
+          alert('Please provide Annual Income for Loan Against Property.');
+          return;
+        }
+        if (asset === 'Gold') {
+          const w = document.querySelector('input[name="asset_gold_weight"]');
+          const p = document.querySelector('input[name="asset_gold_purity"]');
+          const v = document.querySelector('input[name="asset_gold_value"]');
+          const f = document.querySelector('input[name="asset_gold_proof"]');
+          console.log('[DEBUG] Asset=Gold values:', {
+            weight: w && w.value, purity: p && p.value, value: v && v.value, fileSelected: !!(f && f.files && f.files.length)
+          });
+          const goldOk =
+            (w && w.value.trim().length > 0) &&
+            (p && p.value.trim().length > 0) &&
+            (v && v.value.trim().length > 0) &&
+            (f && f.files && f.files.length > 0);
+          if (!goldOk) {
+            e.preventDefault();
+            alert('Please provide Gold Weight, Purity, Estimated Value, and upload Gold Proof.');
+            console.log('[DEBUG] Gold validation failed; preventing submit');
+          }
+        } else {
+          const addr = document.querySelector('input[name="asset_home_address"]');
+          const val = document.querySelector('input[name="asset_home_value"]');
+          console.log('[DEBUG] Asset=Home/Land values:', {
+            address: addr && addr.value, value: val && val.value
+          });
+          const homeOk =
+            (addr && addr.value.trim().length > 0) &&
+            (val && val.value.trim().length > 0);
+          if (!homeOk) {
+            e.preventDefault();
+            alert('Please provide Property Address and Estimated Property Value.');
+            console.log('[DEBUG] Home/Land validation failed; preventing submit');
+          }
+        }
+        try {
+          const payloadPreview = {
+            loan_type: t,
+            amount: amountEl && amountEl.value,
+            duration: durationEl && durationEl.value,
+            interest_rate: rateEl && rateEl.value,
+            monthlyamount: emiEl && emiEl.value,
+            asset_type: assetTypeEl && assetTypeEl.value,
+          };
+          console.log('[DEBUG] Submitting payload:', payloadPreview);
+        } catch (err) {
+          console.log('[DEBUG] Payload log error:', err);
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

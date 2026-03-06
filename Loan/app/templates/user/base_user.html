@@ -1,0 +1,87 @@
+{% load static %}
+<!-- User section base: same nav and container to prevent layout shift between Home, Loan Request, Approved Loans, etc. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Loan Portal{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    <style>
+        :root {
+            --primary-color: #21474b;
+            --secondary-color: #5cbdb9;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-dark: #343a40;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--light-bg); color: var(--text-dark); line-height: 1.6; }
+        .nav-container {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2a5d63 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .logo { font-size: 24px; font-weight: 700; letter-spacing: 1px; display: flex; align-items: center; gap: 12px; }
+        .logo i { color: var(--secondary-color); font-size: 28px; }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
+        .user-avatar {
+            width: 45px; height: 45px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary-color), #8ae9e6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; color: var(--primary-color); font-size: 18px;
+        }
+        nav ul { list-style: none; display: flex; gap: 10px; }
+        nav ul li a {
+            text-decoration: none; color: white; padding: 10px 20px; border-radius: 30px;
+            transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; gap: 8px; white-space: nowrap;
+        }
+        nav ul li a:hover { background-color: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+        nav ul li a.active { background-color: var(--secondary-color); box-shadow: 0 4px 12px rgba(92, 189, 185, 0.3); }
+        .container-user { max-width: 1400px; margin: 30px auto; padding: 0 30px; }
+        @media (max-width: 768px) {
+            .nav-container { flex-direction: column; padding: 15px; }
+            nav ul { flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+        }
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <div class="logo">
+            <i class="fas fa-hand-holding-usd"></i>
+            <span>LOAN PORTAL</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{% url 'loanrequest' %}" {% if request.resolver_match.url_name == 'loanrequest' %}class="active"{% endif %}><i class="fas fa-file-invoice-dollar"></i> Apply for a Loan</a></li>
+                <li><a href="{% url 'applied_loans' %}" {% if request.resolver_match.url_name == 'applied_loans' %}class="active"{% endif %}><i class="fas fa-clipboard-list"></i> Applied Loans</a></li>
+                <li><a href="{% url 'approved_loans' %}" {% if request.resolver_match.url_name == 'approved_loans' %}class="active"{% endif %}><i class="fas fa-check-circle"></i> Approved Loans</a></li>
+                <li><a href="{% url 'user_transactions' %}" {% if request.resolver_match.url_name == 'user_transactions' %}class="active"{% endif %}><i class="fas fa-exchange-alt"></i> Transactions</a></li>
+                <li><a href="{% url 'submit_feedback' %}" {% if request.resolver_match.url_name == 'submit_feedback' %}class="active"{% endif %}><i class="fas fa-comment-alt"></i> Feedback</a></li>
+                <li><a href="{% url 'profile' %}" {% if request.resolver_match.url_name == 'profile' %}class="active"{% endif %}><i class="fas fa-user-circle"></i> Profile</a></li>
+                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </nav>
+        <div class="user-profile">
+            <span style="font-weight:600; color:white;">{{ username|default:"User" }}</span>
+            <div class="user-avatar">{{ username|default:"U"|slice:":1"|upper }}</div>
+        </div>
+    </div>
+    <div class="container-user">
+        {% block content %}{% endblock %}
+    </div>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

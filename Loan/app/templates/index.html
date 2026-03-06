@@ -1,0 +1,481 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LoanPortal Pro | Blockchain-Based Secure Loan Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    <style>
+        :root {
+            --primary: #1a5f7a;
+            --primary-light: #2b7a78;
+            --accent: #159895;
+            --dark: #0d3d4a;
+            --light-bg: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #0d3d4a 0%, #1a5f7a 50%, #0d3d4a 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        h1, h2, h3 { font-family: 'Source Serif 4', serif; }
+
+        /* ----- Header ----- */
+        .site-header {
+            background: rgba(13, 61, 74, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .site-header .navbar-brand {
+            font-family: 'Source Serif 4', serif;
+            font-weight: 700;
+            font-size: 1.35rem;
+            color: #fff !important;
+        }
+        .site-header .navbar-brand i { color: var(--accent); margin-right: 8px; }
+
+        .site-header .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+        }
+        .site-header .nav-link:hover { color: var(--accent) !important; }
+
+        .btn-user-login {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .btn-user-login:hover { background: #138a87; color: #fff; }
+
+        .btn-admin-login {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .btn-admin-login:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ----- Hero ----- */
+        .hero-section {
+            padding: 5rem 0 4rem;
+            text-align: center;
+        }
+        .hero-section h1 {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #fff;
+            line-height: 1.3;
+        }
+        .hero-section .lead {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 1.05rem;
+        }
+        .hero-cta .btn {
+            padding: 0.65rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .hero-cta .btn-primary { background: var(--accent); border-color: var(--accent); }
+        .hero-cta .btn-primary:hover { background: #138a87; border-color: #138a87; }
+        .hero-cta .btn-outline-light:hover { color: var(--dark); }
+
+        /* ----- How It Works ----- */
+        .section-title {
+            font-family: 'Source Serif 4', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #fff;
+        }
+
+        .steps-section { padding: 4rem 0; }
+        .step-card {
+            background: var(--light-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: 100%;
+            text-align: center;
+        }
+        .step-num {
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .step-card h4 { font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff; }
+        .step-card p { color: rgba(255, 255, 255, 0.8); font-size: 0.95rem; margin: 0; }
+
+        /* ----- Why Blockchain ----- */
+        .blockchain-section {
+            padding: 4rem 0;
+            background: rgba(0, 0, 0, 0.15);
+        }
+        .blockchain-section ul {
+            list-style: none;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .blockchain-section li {
+            padding: 0.6rem 0;
+            padding-left: 2rem;
+            position: relative;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .blockchain-section li::before {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* ----- Loan Services ----- */
+        .services-section { padding: 4rem 0; }
+        .service-card {
+            background: var(--light-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            height: 100%;
+            text-align: center;
+        }
+        .service-card i { font-size: 2rem; color: var(--accent); margin-bottom: 1rem; }
+        .service-card h4 { font-size: 1.15rem; color: #fff; margin-bottom: 0.5rem; }
+        .service-card p { color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin: 0; }
+
+        /* ----- Footer ----- */
+        .site-footer {
+            background: rgba(0, 0, 0, 0.25);
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 0 1.5rem;
+            margin-top: 3rem;
+            text-align: center;
+        }
+        .site-footer p { color: rgba(255, 255, 255, 0.75); margin-bottom: 0.4rem; font-size: 0.95rem; }
+        .site-footer a { color: var(--accent); text-decoration: none; }
+        .site-footer a:hover { text-decoration: underline; }
+
+        /* ----- Modals (unchanged behavior) ----- */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); z-index: 2000; align-items: center; justify-content: center; }
+        .modal.show { display: flex !important; }
+        .modal-content {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 420px;
+            width: 90%;
+            position: relative;
+            color: #333;
+        }
+        .close-modal { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; cursor: pointer; color: #666; }
+        .modal h2 { color: var(--dark); margin-bottom: 1.25rem; font-size: 1.35rem; }
+        .modal-input {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            margin: 0.4rem 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .modal-button {
+            background: var(--primary);
+            color: #fff;
+            padding: 0.65rem;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-top: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .modal-button:hover { background: var(--dark); color: #fff; }
+        .modal-links { text-align: center; margin-top: 1rem; font-size: 0.9rem; }
+        .modal-links a { color: var(--primary); text-decoration: none; }
+
+        .input-group .input-label { display: block; margin-bottom: 0.25rem; }
+        .input-group .input-field input[type="file"] { font-size: 0.9rem; }
+
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: #fff;
+            color: #333;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .notification.success { border-left: 4px solid #28a745; }
+        .notification.error { border-left: 4px solid #dc3545; }
+        .notification.info { border-left: 4px solid #17a2b8; }
+        .close-notification { cursor: pointer; margin-left: 8px; }
+
+        .site-header .navbar-toggler { border-color: rgba(255,255,255,0.4); }
+        .site-header .navbar-toggler-icon { filter: brightness(0) invert(1); }
+
+        @media (max-width: 991px) {
+            .hero-section { padding: 3rem 0 2.5rem; }
+            .steps-section, .services-section, .blockchain-section { padding: 3rem 0; }
+        }
+    </style>
+</head>
+<body>
+    {% if msg %}
+    <div class="container mt-3">
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Header -->
+    <header class="site-header">
+        <nav class="navbar navbar-expand-lg container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <i class="fas fa-hand-holding-usd"></i> LoanPortal Pro
+            </a>
+            <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon text-white"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-2 flex-wrap justify-content-lg-end">
+                    <!-- Unified User Login: single page at /login/ (user/login.html) used everywhere -->
+                    <a href="{% url 'login' %}" class="btn btn-user-login text-decoration-none">
+                        <i class="fas fa-sign-in-alt me-1"></i> User Login
+                    </a>
+                    <!-- Admin Login: separate page at /admin/ (admin/admin.html), styled consistently with User Login -->
+                    <a href="{% url 'admin' %}" class="btn btn-admin-login text-decoration-none">
+                        <i class="fas fa-user-shield me-1"></i> Admin Login
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero-section">
+        <div class="container">
+            <h1>Blockchain-Based Secure Loan Management System</h1>
+            <p class="lead">
+                Apply for loans with confidence. Every EMI and transaction is recorded on the blockchain for transparency, security, and trust—giving you a clear, tamper-proof record of your loan journey.
+            </p>
+            <div class="hero-cta d-flex flex-wrap gap-3 justify-content-center">
+                <!-- Apply for Loan: backend (loanrequest view) uses session; not logged in → redirect to User Login, logged in → loan form -->
+                <a href="{% url 'loanrequest' %}" class="btn btn-primary">
+                    <i class="fas fa-file-invoice-dollar me-2"></i> Apply for Loan
+                </a>
+                <a href="{% url 'signup' %}" class="btn btn-outline-light">
+                    <i class="fas fa-user-plus me-2"></i> Sign Up
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="steps-section" id="about">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="step-card">
+                        <div class="step-num">1</div>
+                        <h4>Register & Verify Identity</h4>
+                        <p>Create your account and complete identity verification to get started.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="step-card">
+                        <div class="step-num">2</div>
+                        <h4>Apply for Loan</h4>
+                        <p>Submit your loan application with required details through the portal.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="step-card">
+                        <div class="step-num">3</div>
+                        <h4>Admin Approval</h4>
+                        <p>Administrators review and approve eligible loan requests.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="step-card">
+                        <div class="step-num">4</div>
+                        <h4>EMI Payment Recorded on Blockchain</h4>
+                        <p>Each EMI payment is securely recorded on the blockchain for transparency.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Blockchain -->
+    <section class="blockchain-section">
+        <div class="container">
+            <h2 class="section-title">Why Blockchain?</h2>
+            <ul>
+                <li>Immutable transaction records that cannot be altered or deleted</li>
+                <li>Transparency in EMI payments and loan history for all parties</li>
+                <li>Security and trust through decentralized, auditable ledgers</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Loan Services -->
+    <section class="services-section" id="services">
+        <div class="container">
+            <h2 class="section-title">Loan Services</h2>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <a href="{% url 'loanrequest' %}" class="text-decoration-none ripple-container" title="Apply for Personal Loan">
+                        <div class="service-card" tabindex="0" aria-label="Apply for Personal Loan">
+                            <i class="fas fa-user"></i>
+                            <h4>Personal Loan</h4>
+                            <p>Flexible personal loans for your individual needs with competitive rates.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'loanrequest' %}" class="text-decoration-none ripple-container" title="Apply for Loan Against Property">
+                        <div class="service-card" tabindex="0" aria-label="Apply for Loan Against Property">
+                            <i class="fas fa-building"></i>
+                            <h4>Loan Against Property</h4>
+                            <p>Leverage property assets to secure funding with competitive terms.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'loanrequest' %}" class="text-decoration-none ripple-container" title="Apply for Education Loan">
+                        <div class="service-card" tabindex="0" aria-label="Apply for Education Loan">
+                            <i class="fas fa-graduation-cap"></i>
+                            <h4>Education Loan</h4>
+                            <p>Finance your education with dedicated education loan products.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'loanrequest' %}" class="text-decoration-none ripple-container" title="Apply for Agriculture Loan">
+                        <div class="service-card" tabindex="0" aria-label="Apply for Agriculture Loan">
+                            <i class="fas fa-seedling"></i>
+                            <h4>Agriculture Loan</h4>
+                            <p>Support for farming and agri-related investments at fair rates.</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer" id="contact">
+        <div class="container">
+            <p><strong>LoanPortal Pro</strong> — Blockchain-Based Secure Loan Management System</p>
+            <p>Support: <a href="mailto:support@loanportalpro.com">support@loanportalpro.com</a></p>
+            <p class="mb-0 mt-2">&copy; 2024 LoanPortal Pro. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- User Login modal removed: single User Login page at /login/ (user/login.html) used app-wide. -->
+    <!-- Admin Login modal removed: Admin Login page at /admin/ (admin/admin.html). -->
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('forgotPasswordModal')">&times;</span>
+            <h2>Reset Password</h2>
+            <form id="forgotPasswordForm">
+                <input type="email" class="modal-input" placeholder="Enter your email" required>
+                <button type="submit" class="modal-button">Send Reset Link</button>
+            </form>
+            <div class="modal-links">
+                <a href="{% url 'login' %}">Back to Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        /* User/Admin login modals removed: unified User Login at /login/, Admin Login at /admin/ */
+        function showForgotPasswordModal() { closeAllModals(); document.getElementById('forgotPasswordModal').classList.add('show'); document.getElementById('forgotPasswordModal').style.display = 'flex'; }
+        function closeModal(modalId) { var m = document.getElementById(modalId); m.style.display = 'none'; m.classList.remove('show'); }
+        function closeAllModals() { document.querySelectorAll('.modal').forEach(function(m) { m.style.display = 'none'; m.classList.remove('show'); }); }
+
+        function showNotification(message, type) {
+            type = type || 'info';
+            var notification = document.createElement('div');
+            notification.className = 'notification ' + type;
+            notification.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle') + '"></i><span>' + message + '</span><span class="close-notification">&times;</span>';
+            document.body.appendChild(notification);
+            setTimeout(function() { if (notification.parentNode) notification.remove(); }, 5000);
+        }
+
+        document.querySelectorAll('.modal').forEach(function(modal) {
+            modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(modal.id); });
+        });
+        document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showNotification('Password reset link sent to your email!', 'success');
+            setTimeout(function() { closeModal('forgotPasswordModal'); }, 1500);
+        });
+        // Ripple click feedback for service cards
+        document.querySelectorAll('.ripple-container').forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                var rect = el.getBoundingClientRect();
+                var ripple = document.createElement('span');
+                ripple.className = 'ripple';
+                var size = Math.max(rect.width, rect.height);
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+                ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+                el.appendChild(ripple);
+                setTimeout(function() { if (ripple && ripple.parentNode) ripple.parentNode.removeChild(ripple); }, 600);
+            });
+        });
+    </script>
+</body>
+</html>

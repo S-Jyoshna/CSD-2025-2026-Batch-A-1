@@ -1,0 +1,228 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Loan Details{% endblock %}
+
+{% block extra_css %}
+<style>
+    .loan-detail-wrapper { max-width: 1100px; margin: 0 auto; }
+    .loan-section-card { background: #ffffff; border-radius: 10px; padding: 18px 20px; margin-bottom: 18px; box-shadow: 0 4px 18px rgba(0,0,0,0.04); border: 1px solid #e5e7eb; }
+    .loan-section-card h4 { margin: 0 0 10px 0; font-size: 1.05rem; font-weight: 600; color: var(--primary-color); }
+    .detail { display: grid; grid-template-columns: 220px 1fr; gap: 8px 18px; padding: 6px 0; font-size: 0.9rem; }
+    .label { font-weight: 600; color: #374151; }
+    .value { color: #4b5563; }
+    .badge-pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; }
+    .badge-low { background:#d1fae5; color:#065f46; }
+    .badge-medium { background:#fef3c7; color:#92400e; }
+    .badge-high { background:#fee2e2; color:#991b1b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="loan-detail-wrapper">
+    <h2 style="margin-bottom: 16px;">Loan #{{ loan.id }} – {{ personal.full_name }}</h2>
+    <p style="margin-bottom: 20px; font-size:0.9rem; color:#6b7280;">
+        Review the customer's profile, loan application and system-generated risk assessment before taking any action.
+        Approval and rejection actions remain available on the main Manage Loan Requests page.
+    </p>
+
+    <div class="loan-section-card">
+        <h4>Personal Information</h4>
+        <div class="detail"><div class="label">Full Name</div><div class="value">{{ personal.full_name }}</div></div>
+        <div class="detail"><div class="label">Email</div><div class="value">{{ personal.email }}</div></div>
+        <div class="detail"><div class="label">Mobile Number</div><div class="value">{{ personal.mobile }}</div></div>
+    </div>
+
+    <div class="loan-section-card">
+        <h4>Identity Details</h4>
+        <div class="detail"><div class="label">PAN Number</div><div class="value">{{ personal.pan }}</div></div>
+        <div class="detail"><div class="label">Gender</div><div class="value">{{ personal.gender|default:"—" }}</div></div>
+        <div class="detail"><div class="label">Date of Birth</div><div class="value">{% if personal.dob %}{{ personal.dob|date:"Y-m-d" }}{% else %}—{% endif %}</div></div>
+        <div class="detail"><div class="label">Address</div><div class="value">{{ personal.address|default:"—" }}</div></div>
+    </div>
+
+    <div class="loan-section-card">
+        <h4>Loan Application Details</h4>
+        <div class="detail"><div class="label">Loan Type</div><div class="value">{% if loan_details.loan_type == "Home" %}Loan Against Property{% else %}{{ loan_details.loan_type }}{% endif %}</div></div>
+        {% if loan_details.loan_type == "Agriculture" and loan_details.farmer_type %}
+        <div class="detail"><div class="label">Farmer Type</div><div class="value">{{ loan_details.farmer_type }}</div></div>
+        {% endif %}
+        <div class="detail"><div class="label">Loan Amount</div><div class="value">{{ loan_details.amount }}</div></div>
+        <div class="detail"><div class="label">Duration (months)</div><div class="value">{{ loan_details.duration }}</div></div>
+        <div class="detail"><div class="label">Interest Rate (% p.a.)</div><div class="value">{{ loan_details.interest_rate }}</div></div>
+        <div class="detail"><div class="label">Monthly EMI</div><div class="value">{{ loan_details.monthly_emi }}</div></div>
+        <div class="detail"><div class="label">Purpose of Loan</div><div class="value">{{ loan_details.purpose }}</div></div>
+        <div class="detail"><div class="label">Surety Type</div><div class="value">{{ loan_details.surety_type|title }}</div></div>
+
+{% if loan_details.loan_type == "Home" %}
+        {% if income_present %}
+        <hr class="my-3">
+        <h5 style="font-size:0.95rem; font-weight:600; margin-bottom:8px;">Income-based Details</h5>
+        <div class="detail">
+            {% if loan_details.income.employment_type %}<div class="label">Employment Type</div><div class="value">{{ loan_details.income.employment_type }}</div>{% endif %}
+            {% if loan_details.income.annual %}<div class="label">Annual Income</div><div class="value">{{ loan_details.income.annual }}</div>{% endif %}
+            {% if loan_details.income.monthly %}<div class="label">Monthly Income</div><div class="value">{{ loan_details.income.monthly }}</div>{% endif %}
+            {% if loan_details.income.employer_name %}<div class="label">Employer / Business</div><div class="value">{{ loan_details.income.employer_name }}</div>{% endif %}
+            {% if loan_details.income.years %}<div class="label">Years of Employment / Business</div><div class="value">{{ loan_details.income.years }}</div>{% endif %}
+            {% if loan_details.income.proof_path %}<div class="label">Income Proof</div><div class="value"><a href="{{ loan_details.income.proof_path }}" target="_blank">View document</a></div>{% endif %}
+        </div>
+        {% endif %}
+        {% if asset_present %}
+        <hr class="my-3">
+        <h5 style="font-size:0.95rem; font-weight:600; margin-bottom:8px;">Asset-based Details</h5>
+        <div class="detail">
+            {% if loan_details.asset.type %}<div class="label">Asset Type</div><div class="value">{% if loan_details.asset.type == "Home" %}Home / Land{% else %}{{ loan_details.asset.type }}{% endif %}</div>{% endif %}
+            {% if loan_details.asset.home_address %}<div class="label">Property Address</div><div class="value">{{ loan_details.asset.home_address }}</div>{% endif %}
+            {% if loan_details.asset.home_value %}<div class="label">Estimated Property Value</div><div class="value">{{ loan_details.asset.home_value }}</div>{% endif %}
+            {% if loan_details.asset.home_proof_path %}<div class="label">Ownership Proof</div><div class="value"><a href="{{ loan_details.asset.home_proof_path }}" target="_blank">View document</a></div>{% endif %}
+            {% if loan_details.asset.gold_weight %}<div class="label">Gold Weight (grams)</div><div class="value">{{ loan_details.asset.gold_weight }}</div>{% endif %}
+            {% if loan_details.asset.gold_purity %}<div class="label">Gold Purity</div><div class="value">{{ loan_details.asset.gold_purity }}</div>{% endif %}
+            {% if loan_details.asset.gold_value %}<div class="label">Estimated Gold Value</div><div class="value">{{ loan_details.asset.gold_value }}</div>{% endif %}
+            {% if loan_details.asset.gold_proof_path %}<div class="label">Gold Proof</div><div class="value"><a href="{{ loan_details.asset.gold_proof_path }}" target="_blank">View document</a></div>{% endif %}
+            {% if loan_details.asset.offline_verification_required %}<div class="label">Offline Verification Required</div><div class="value">Yes</div>{% endif %}
+        </div>
+        {% endif %}
+{% elif loan_details.surety_type == "income" %}
+        <hr class="my-3">
+        <h5 style="font-size:0.95rem; font-weight:600; margin-bottom:8px;">Income-based Details</h5>
+        <div class="detail">
+            {% if loan_details.income.employment_type %}<div class="label">Employment Type</div><div class="value">{{ loan_details.income.employment_type }}</div>{% endif %}
+            {% if loan_details.income.annual %}<div class="label">Annual Income</div><div class="value">{{ loan_details.income.annual }}</div>{% endif %}
+            {% if loan_details.income.monthly %}<div class="label">Monthly Income</div><div class="value">{{ loan_details.income.monthly }}</div>{% endif %}
+            {% if loan_details.income.employer_name %}<div class="label">Employer / Business</div><div class="value">{{ loan_details.income.employer_name }}</div>{% endif %}
+            {% if loan_details.income.years %}<div class="label">Years of Employment / Business</div><div class="value">{{ loan_details.income.years }}</div>{% endif %}
+            {% if loan_details.income.proof_path %}<div class="label">Income Proof</div><div class="value"><a href="{{ loan_details.income.proof_path }}" target="_blank">View document</a></div>{% endif %}
+        </div>
+        {% elif loan_details.surety_type == "guarantor" %}
+        <hr class="my-3">
+        <h5 style="font-size:0.95rem; font-weight:600; margin-bottom:8px;">Guarantor Details</h5>
+        <div class="detail">
+            {% if loan_details.guarantor.name %}<div class="label">Guarantor Name</div><div class="value">{{ loan_details.guarantor.name }}</div>{% endif %}
+            {% if loan_details.guarantor.relationship %}<div class="label">Relationship</div><div class="value">{{ loan_details.guarantor.relationship }}</div>{% endif %}
+            {% if loan_details.guarantor.pan %}<div class="label">PAN</div><div class="value">{{ loan_details.guarantor.pan }}</div>{% endif %}
+            {% if loan_details.guarantor.mobile %}<div class="label">Mobile</div><div class="value">{{ loan_details.guarantor.mobile }}</div>{% endif %}
+            {% if loan_details.guarantor.address %}<div class="label">Address</div><div class="value">{{ loan_details.guarantor.address }}</div>{% endif %}
+            {% if loan_details.guarantor.employment_type %}<div class="label">Employment Type</div><div class="value">{{ loan_details.guarantor.employment_type }}</div>{% endif %}
+            {% if loan_details.guarantor.annual_income %}<div class="label">Annual Income</div><div class="value">{{ loan_details.guarantor.annual_income }}</div>{% endif %}
+            {% if loan_details.guarantor.monthly_income %}<div class="label">Monthly Income</div><div class="value">{{ loan_details.guarantor.monthly_income }}</div>{% endif %}
+            {% if loan_details.guarantor.employer_name %}<div class="label">Employer / Business</div><div class="value">{{ loan_details.guarantor.employer_name }}</div>{% endif %}
+            {% if loan_details.guarantor.years %}<div class="label">Years of Employment / Business</div><div class="value">{{ loan_details.guarantor.years }}</div>{% endif %}
+            {% if loan_details.guarantor.proof_path %}<div class="label">Income Proof</div><div class="value"><a href="{{ loan_details.guarantor.proof_path }}" target="_blank">View document</a></div>{% endif %}
+        </div>
+        {% elif loan_details.surety_type == "asset" %}
+        <hr class="my-3">
+        <h5 style="font-size:0.95rem; font-weight:600; margin-bottom:8px;">Asset-based Details</h5>
+        <div class="detail">
+            {% if loan_details.asset.type %}
+                <div class="label">Asset Type</div>
+                <div class="value">
+                    {% if loan_details.loan_type == "Agriculture" and loan_details.asset.type == "Home" %}
+                        Land
+                    {% elif loan_details.loan_type == "Agriculture" and loan_details.asset.type == "Gold" %}
+                        Equipment
+                    {% elif loan_details.asset.type == "Home" %}
+                        Home / Land
+                    {% else %}
+                        {{ loan_details.asset.type }}
+                    {% endif %}
+                </div>
+            {% endif %}
+            {% if loan_details.asset.type == "Home" %}
+                {% if loan_details.asset.home_address %}<div class="label">Property Address</div><div class="value">{{ loan_details.asset.home_address }}</div>{% endif %}
+                {% if loan_details.asset.home_value %}<div class="label">Estimated Property Value</div><div class="value">{{ loan_details.asset.home_value }}</div>{% endif %}
+                {% if loan_details.asset.home_proof_path %}<div class="label">Ownership Proof</div><div class="value"><a href="{{ loan_details.asset.home_proof_path }}" target="_blank">View document</a></div>{% endif %}
+            {% elif loan_details.asset.type == "Gold" %}
+                {% if loan_details.loan_type == "Agriculture" %}
+                    {% if loan_details.asset.equipment_type %}<div class="label">Equipment Type</div><div class="value">{{ loan_details.asset.equipment_type }}</div>{% endif %}
+                    {% if loan_details.asset.equipment_model %}<div class="label">Equipment Model</div><div class="value">{{ loan_details.asset.equipment_model }}</div>{% endif %}
+                    {% if loan_details.asset.equipment_value %}<div class="label">Estimated Asset Value</div><div class="value">{{ loan_details.asset.equipment_value }}</div>{% endif %}
+                    {% if loan_details.asset.equipment_proof_path %}<div class="label">Owner Proof</div><div class="value"><a href="{{ loan_details.asset.equipment_proof_path }}" target="_blank">View document</a></div>{% endif %}
+                {% else %}
+                    {% if loan_details.asset.gold_weight %}<div class="label">Gold Weight (grams)</div><div class="value">{{ loan_details.asset.gold_weight }}</div>{% endif %}
+                    {% if loan_details.asset.gold_purity %}<div class="label">Gold Purity</div><div class="value">{{ loan_details.asset.gold_purity }}</div>{% endif %}
+                    {% if loan_details.asset.gold_value %}<div class="label">Estimated Gold Value</div><div class="value">{{ loan_details.asset.gold_value }}</div>{% endif %}
+                    {% if loan_details.asset.gold_proof_path %}<div class="label">Gold Proof</div><div class="value"><a href="{{ loan_details.asset.gold_proof_path }}" target="_blank">View document</a></div>{% endif %}
+                {% endif %}
+            {% endif %}
+            {% if loan_details.asset.offline_verification_required %}<div class="label">Offline Verification Required</div><div class="value">Yes</div>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="loan-section-card">
+        <h4>Risk / Eligibility Details</h4>
+        <div class="detail"><div class="label">Annual Income</div><div class="value">{{ risk.annual_income }}</div></div>
+        <div class="detail"><div class="label">Monthly Income</div><div class="value">{{ risk.monthly_income }}</div></div>
+        <div class="detail"><div class="label">EMI-to-Income Ratio (%)</div><div class="value">{{ risk.emi_to_income_ratio }}</div></div>
+        <div class="detail"><div class="label">Employment Stability</div><div class="value">{{ risk.employment_stability }}</div></div>
+        <div class="detail"><div class="label">Surety Strength</div><div class="value">{{ risk.surety_strength }}</div></div>
+        {% if risk.asset_coverage is not None %}
+        <div class="detail"><div class="label">Asset Coverage / LTV (%)</div><div class="value">{{ risk.asset_coverage }}</div></div>
+        {% endif %}
+        <div class="detail"><div class="label">Overall Risk Score</div><div class="value">
+            {% if risk.overall_risk_score == "Low" %}
+                <span class="badge-pill badge-low">{{ risk.overall_risk_score }}</span>
+            {% elif risk.overall_risk_score == "High" %}
+                <span class="badge-pill badge-high">{{ risk.overall_risk_score }}</span>
+            {% else %}
+                <span class="badge-pill badge-medium">{{ risk.overall_risk_score }}</span>
+            {% endif %}
+        </div></div>
+        <div class="detail"><div class="label">System Recommendation</div><div class="value">{{ risk.system_recommendation }}</div></div>
+    </div>
+
+    <div class="loan-section-card">
+        <h4>Loan History Summary</h4>
+        {% if data %}
+        <table class="admin-table" style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr>
+                    <th style="text-align:left; padding:10px 12px; background:var(--primary-color); color:#fff;">Serial Number</th>
+                    <th style="text-align:left; padding:10px 12px; background:var(--primary-color); color:#fff;">Loan Type</th>
+                    <th style="text-align:left; padding:10px 12px; background:var(--primary-color); color:#fff;">Duration</th>
+                    <th style="text-align:left; padding:10px 12px; background:var(--primary-color); color:#fff;">Status</th>
+                    <th style="text-align:left; padding:10px 12px; background:var(--primary-color); color:#fff;">Total Amount to be Paid</th>
+                    <th style="text-align:left; padding:10px 12px; background:var(--primary-color); color:#fff;">Remaining Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td style="padding:10px 12px;">{{ forloop.counter }}</td>
+                    <td style="padding:10px 12px;">{{ item.loan_type }}</td>
+                    <td style="padding:10px 12px;">{{ item.total_emis }} months</td>
+                    <td style="padding:10px 12px;">
+                        {% if item.display_status == 'Pending' or item.display_status == 'Pending ' %}
+                        <span class="status-badge pending">{{ item.display_status }}</span>
+                        {% elif item.display_status == 'Approved' or item.display_status == 'Active' %}
+                        <span class="status-badge approved">{{ item.display_status }}</span>
+                        {% elif item.display_status == 'Rejected' %}
+                        <span class="status-badge rejected">{{ item.display_status }}</span>
+                        {% elif item.display_status == 'Completed' %}
+                        <span class="status-badge completed">{{ item.display_status }}</span>
+                        {% else %}
+                        <span class="status-badge pending">{{ item.display_status }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding:10px 12px;">${{ item.total_amount_to_pay|floatformat:0 }}</td>
+                    <td style="padding:10px 12px;">${{ item.remaining_amount|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="margin:6px 0; color:var(--text-light);">No loan history available.</p>
+        {% endif %}
+    </div>
+
+    {% if return_to == 'dashboard' %}
+        <a href="{% url 'admin_dashboard' %}" class="btn" style="background:var(--primary-color); color:#fff; border-radius:6px; padding:8px 16px; font-size:0.9rem;">
+            Back to Dashboard
+        </a>
+    {% else %}
+        <a href="{% url 'manageloanrequest' %}" class="btn" style="background:var(--primary-color); color:#fff; border-radius:6px; padding:8px 16px; font-size:0.9rem;">
+            Back to Manage Loan Requests
+        </a>
+    {% endif %}
+</div>
+{% endblock %}
+

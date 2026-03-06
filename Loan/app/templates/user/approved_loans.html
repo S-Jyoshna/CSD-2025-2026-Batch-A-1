@@ -1,0 +1,97 @@
+{% extends "user/base_user.html" %}
+{% load static %}
+{# Approved Loans: extends base_user for consistent nav/layout (no layout shift; no duplicate nav or .logo padding). #}
+
+{% block title %}My Approved Loans{% endblock %}
+
+{% block extra_css %}
+<style>
+    .content h2 { text-align: center; margin-bottom: 30px; color: var(--primary-color); }
+    .search-filter-container { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 15px; }
+    .search-bar { flex-grow: 1; max-width: 400px; position: relative; }
+    .search-bar input { width: 100%; padding: 10px 15px 10px 40px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; outline: none; transition: border-color 0.3s; }
+    .search-bar input:focus { border-color: #21474b; }
+    .search-bar i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #777; }
+    .filter-dropdown { position: relative; }
+    .filter-btn { background-color: white; color: #21474b; padding: 10px 20px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 8px; min-width: 180px; justify-content: space-between; }
+    .filter-btn:hover { background-color: #f5f5f5; }
+    .dropdown-content { display: none; position: absolute; right: 0; background-color: white; min-width: 180px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 5px; overflow: hidden; border: 1px solid #eee; }
+    .dropdown-content a { color: #21474b; padding: 12px 16px; text-decoration: none; display: block; transition: background-color 0.3s; text-align: left; }
+    .dropdown-content a:hover { background-color: #f0f0f0; }
+    .dropdown-content a.active { background-color: #21474b; color: white; }
+    .show { display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
+    th { background-color: #21474b; color: white; }
+    tr:hover { background-color: #f5f5f5; }
+    .pay-btn { padding: 8px 16px; font-size: 14px; background-color: #21474b; color: white; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; }
+    .pay-btn:hover { background-color: #2d5d62; }
+    .na-text { color: grey; }
+    @media (max-width: 600px) { .search-filter-container { flex-direction: column; } .search-bar { max-width: 100%; } .filter-dropdown { width: 100%; } .filter-btn { width: 100%; } .dropdown-content { width: 100%; } }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <h2>Approved Loans</h2>
+        <table id="loanTable">
+            <thead>
+                <tr>
+                    <th>Serial Number</th>
+                    <th>Loan ID</th>
+                    <th>Loan Type</th>
+                    <th>Interest Rate (% p.a.)</th>
+                    <th>Duration</th>
+                    <th>Total Loan Amount</th>
+                    <th>EMI</th>
+                    <th>Reason</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyTag">
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let id = "{{ id|default:'' }}";
+if (id) sessionStorage.setItem('user', id);
+let user = sessionStorage.getItem('user');
+if (user == null) window.location.href = '/';
+
+            function goToPayment(loanId, amount) {
+                var url = "{% url 'loan_payment' 0 %}".replace('/0/', '/' + loanId + '/');
+                window.location.href = url;
+            }
+
+        fetch('/getApprovedLoans?id=' + user).then(function(view) { return view.json(); }).then(function(view) {
+            var loans = (view.data || []).filter(function(loan) {
+                var s = (loan.status || '').trim();
+                return s === 'Approved' || s === 'Active';
+            });
+            renderLoans(loans);
+        });
+
+        function renderLoans(loans) {
+    var text = '';
+    var i = 1;
+    loans.forEach(function(loan) {
+        var displayId = loan.loan_number || loan.id;
+        text += '<tr><td>' + (i++) + '</td><td>#' + displayId + '</td><td>' + loan.loan_details + '</td><td>' + (loan.interest_rate || '') + '</td><td>' + loan.duration + ' months</td><td>₹' + loan.amount + '</td><td>' + loan.monthlyamount + '</td><td>' + getReasonText(loan) + '</td><td>' + getPaymentButton(loan) + '</td></tr>';
+    });
+    document.getElementById('tbodyTag').innerHTML = text;
+}
+
+function getReasonText(loan) {
+    if (loan.status === 'Approved') return loan.approved_reason || 'Approved by admin';
+    return '<span class="na-text">—</span>';
+}
+
+        function getPaymentButton(loan) {
+            if (loan.status === 'Active') return '<button onclick="goToPayment(\'' + loan.id + '\', \'' + loan.amount + '\')" class="pay-btn">Pay Now</button>';
+            return '<span class="na-text">Not Due</span>';
+        }
+</script>
+{% endblock %}

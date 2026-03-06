@@ -1,0 +1,271 @@
+{% extends "admin/base_admin.html" %}
+{% load static %}
+{# Admin Dashboard: extends base_admin for consistent nav; Dashboard → Manage Customer → Dashboard works with admin_display_name in context. #}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .welcome-section { background: #fff; padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #e9ecef; }
+    .welcome-text h1 { color: var(--primary-color); margin-bottom: 6px; font-weight: 700; font-size: 2rem; }
+    .welcome-text p { color: var(--text-light); font-size: 0.95rem; max-width: 720px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 40px; }
+    .stat-card {
+        background: var(--card-bg); padding: 25px; border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        display: flex; align-items: center; gap: 20px;
+        transition: transform 0.3s ease; border-top: 4px solid var(--secondary-color);
+    }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); }
+    .stat-icon {
+        width: 60px; height: 60px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;
+    }
+    .stat-card:nth-child(1) .stat-icon { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .stat-card:nth-child(2) .stat-icon { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .stat-card:nth-child(3) .stat-icon { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .stat-card:nth-child(4) .stat-icon { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .stat-info h3 { font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 5px; }
+    .stat-info p { color: var(--text-light); font-size: 0.9rem; }
+    .section-card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); margin-bottom: 40px; }
+    .section-card h3 { color: var(--primary-color); margin-bottom: 20px; font-weight: 600; }
+    .admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+    .admin-table th, .admin-table td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
+    .admin-table th { background-color: var(--primary-color); color: white; }
+    .badge { display: inline-block; padding: 6px 10px; border-radius: 16px; font-size: 12px; }
+    .badge-view { background-color: #007bff; color: white; }
+    .badge-success { background-color: #28a745; color: white; }
+    .badge-pending { background-color: #ffc107; color: #212529; }
+    .badge-failed { background-color: #dc3545; color: white; }
+    .recent-activity { background: var(--card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); }
+    .recent-activity h3 { color: var(--primary-color); margin-bottom: 25px; font-weight: 600; }
+    .activity-list { display: flex; flex-direction: column; gap: 15px; }
+    .activity-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid var(--secondary-color); }
+    .activity-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--secondary-color); display: flex; align-items: center; justify-content: center; color: white; }
+    @media (max-width: 1200px) { }
+    @media (max-width: 992px) { .welcome-section { text-align: left; } }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 576px) { }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="welcome-section">
+        <div class="welcome-text">
+            <h1>Admin Dashboard</h1>
+            <p>Overview of system status and pending actions</p>
+        </div>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_customers }}</h3>
+                <p>Total Customers</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div class="stat-info">
+                <h3>{{ active_loans }}</h3>
+                <p>Active Loans</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-credit-card"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_loan_amount }}</h3>
+                <p>Total Loan Amount Issued</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-hand-holding-usd"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_amount_repaid }}</h3>
+                <p>Total Amount Repaid</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_interest_earned }}</h3>
+                <p>Total Interest Earned</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+                <h3>{{ completed_loans }}</h3>
+                <p>Completed Loans</p>
+            </div>
+        </div>
+    </div>
+    <div class="section-card">
+        <h3>Pending User Registrations</h3>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if pending_users %}
+                {% for u in pending_users %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ u.username }}</td>
+                    <td>{{ u.email }}</td>
+                    <td><a class="badge badge-view" href="{% url 'admin_view_customer' u.id %}?from=dashboard">View</a></td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td colspan="5">No pending user registrations</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <div class="section-card">
+        <h3>Pending Loan Requests</h3>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Loan ID</th>
+                    <th>Customer Name</th>
+                    <th>Loan Type</th>
+                    <th>Loan Amount</th>
+                    <th>EMI</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if pending_loans %}
+                {% for loan in pending_loans %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ loan.loan_number }}</td>
+                    <td>{{ loan.customer_name }}</td>
+                    <td>{{ loan.loan_type|default:loan.loan_details }}</td>
+                    <td>₹{{ loan.amount }}</td>
+                    <td>₹{{ loan.monthlyamount }}</td>
+                    <td>{{ loan.duration }}</td>
+                    <td><span class="status-badge pending">{{ loan.status }}</span></td>
+                    <td>
+                        <a class="badge badge-view" href="{% url 'admin_view_loan' loan.id %}?from=dashboard">View</a>
+                        <form method="POST" action="{% url 'approveloan' %}" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ loan.id }}">
+                            <input type="hidden" name="reason" value="Approved via Dashboard">
+                            <button type="submit" class="badge badge-success">Approve</button>
+                        </form>
+                        <form method="POST" action="{% url 'rejectloan' %}" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ loan.id }}">
+                            <input type="hidden" name="reason" value="Rejected via Dashboard">
+                            <button type="submit" class="badge badge-failed">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td colspan="9">No pending loan requests</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <div class="section-card">
+        <h3>Pending Transactions</h3>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Transaction ID</th>
+                    <th>Customer Name</th>
+                    <th>Monthly Amount</th>
+                    <th>Payment Method</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if pending_transactions %}
+                {% for tx in pending_transactions %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ tx.transaction_number }}</td>
+                    <td>{{ tx.username.username }}</td>
+                    <td>₹{{ tx.monthlyamount }}</td>
+                    <td>{{ tx.method }}</td>
+                    <td>{{ tx.transaction_date|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <a href="/update_status?id={{ tx.transaction_number }}&status=Success" class="badge badge-success">Success</a>
+                        <a href="/update_status?id={{ tx.transaction_number }}&status=Failed" class="badge badge-failed">Failed</a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td colspan="7">No pending transactions</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <!--
+    <div class="section-card">
+        <h3>Loan History Summary</h3>
+        {% if data %}
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Serial Number</th>
+                    <th>Loan Type</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th>Total Amount to be Paid</th>
+                    <th>Remaining Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.loan_type }}</td>
+                    <td>{{ item.total_emis }} months</td>
+                    <td>
+                        {% if item.display_status == 'Pending' or item.display_status == 'Pending ' %}
+                        <span class="status-badge pending">{{ item.display_status }}</span>
+                        {% elif item.display_status == 'Approved' or item.display_status == 'Active' %}
+                        <span class="status-badge approved">{{ item.display_status }}</span>
+                        {% elif item.display_status == 'Rejected' %}
+                        <span class="status-badge failed">{{ item.display_status }}</span>
+                        {% elif item.display_status == 'Completed' %}
+                        <span class="status-badge">{{ item.display_status }}</span>
+                        {% else %}
+                        <span class="status-badge pending">{{ item.display_status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>${{ item.total_amount_to_pay|floatformat:0 }}</td>
+                    <td>${{ item.remaining_amount|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <table class="admin-table">
+            <tbody>
+                <tr>
+                    <td colspan="6">No loan history available.</td>
+                </tr>
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+-->
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

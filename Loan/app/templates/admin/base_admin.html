@@ -1,0 +1,76 @@
+{% load static %}
+<!-- Admin section base: same sidebar/nav on all admin pages to prevent layout shift and navigation errors. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Admin - Loan Portal{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    <style>
+        :root {
+            --primary-color: #21474b;
+            --secondary-color: #5cbdb9;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-dark: #343a40;
+            --text-light: #6c757d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--light-bg); color: var(--text-dark); line-height: 1.6; }
+        .nav-container {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2a5d63 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .logo { font-size: 24px; font-weight: 700; letter-spacing: 1px; display: flex; align-items: center; gap: 12px; }
+        .logo i { color: var(--secondary-color); font-size: 28px; }
+        nav ul { list-style: none; display: flex; gap: 10px; }
+        nav ul li a {
+            text-decoration: none; color: white; padding: 10px 20px; border-radius: 30px;
+            transition: all 0.3s ease; font-weight: 500; display: flex; align-items: center; gap: 8px; white-space: nowrap;
+        }
+        nav ul li a:hover { background-color: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+        nav ul li a.active { background-color: var(--secondary-color); box-shadow: 0 4px 12px rgba(92, 189, 185, 0.3); }
+        .admin-content { padding: 30px; max-width: 1900px; margin: 30px auto; }
+        @media (max-width: 992px) {
+            .nav-container { flex-direction: column; padding: 15px; }
+            nav ul { flex-wrap: wrap; justify-content: center; margin-top: 15px; }
+        }
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <div class="logo">
+            <i class="fas fa-hand-holding-usd"></i>
+            <span>LOAN PORTAL</span>
+        </div>
+        <nav>
+            <ul>
+                {# Admin dashboard uses unique URL name (admin_dashboard) to avoid conflicts. #}
+                <li><a href="{% url 'admin_dashboard' %}" {% if request.resolver_match.url_name == 'admin_dashboard' %}class="active"{% endif %}><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="{% url 'managecustomer' %}" {% if request.resolver_match.url_name == 'managecustomer' %}class="active"{% endif %}><i class="fas fa-users"></i> Manage Customer</a></li>
+                <li><a href="{% url 'manageloanrequest' %}" {% if request.resolver_match.url_name == 'manageloanrequest' %}class="active"{% endif %}><i class="fas fa-file-invoice-dollar"></i> Manage Loan Request</a></li>
+                <li><a href="{% url 'paymentadmin' %}"><i class="fas fa-credit-card"></i> Payment Details</a></li>
+                <li><a href="{% url 'admin_feedback' %}"><i class="fas fa-comment-alt"></i> Reviews</a></li>
+                <li><a href="{% url 'profileadmin' %}"><i class="fas fa-user-cog"></i> Profile Admin</a></li>
+                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="admin-content">
+        {% block content %}{% endblock %}
+    </div>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

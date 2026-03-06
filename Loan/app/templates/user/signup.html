@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loan Portal - Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(rgba(15, 42, 46, 0.88), rgba(15, 42, 46, 0.92)),
+                url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 0;
+            color: #333;
+        }
+        .signup-card {
+            max-width: 560px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .signup-header {
+            background: linear-gradient(135deg, #1a4a5a, #2b7a78);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        .signup-header h1 { font-size: 1.5rem; font-weight: 600; margin: 0 0 6px 0; }
+        .signup-header p { margin: 0; opacity: 0.9; font-size: 0.95rem; }
+        .signup-body { padding: 28px; }
+        .form-label { font-weight: 500; color: #444; }
+        .form-control:focus { border-color: #1a4a5a; box-shadow: 0 0 0 0.2rem rgba(26, 74, 90, 0.2); }
+        .invalid-feedback { display: block; }
+        .alert { border-radius: 8px; }
+        .btn-register {
+            background: linear-gradient(135deg, #1a4a5a, #2b7a78);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-weight: 600;
+            border-radius: 8px;
+            width: 100%;
+        }
+        .btn-register:hover { color: white; opacity: 0.95; }
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+        .login-link a { color: #1a4a5a; font-weight: 500; }
+        .input-group-text { background: #f0f4f5; border-color: #dee2e6; }
+        .password-toggle { cursor: pointer; }
+        .back-to-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 0.9rem;
+            color: #1a4a5a;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .back-to-home:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="signup-card">
+        <div class="signup-header">
+            <h1><i class="fas fa-user-plus me-2"></i>Loan Portal Registration</h1>
+            <p>Create your account to manage loans and applications</p>
+        </div>
+        <div class="signup-body">
+            {% if msg %}
+            <div class="alert alert-danger mb-3" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>{{ msg }}
+            </div>
+            {% endif %}
+
+            <form method="post" id="signupForm" novalidate enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="id_full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="id_full_name" name="full_name" placeholder="Enter full name" required
+                            value="{{ form.full_name|default:'' }}" maxlength="255" />
+                        {% if errors.full_name %}<div class="invalid-feedback d-block">{{ errors.full_name }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_username" class="form-label">Username <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="id_username" name="username" placeholder="Choose username" required
+                            value="{{ form.username|default:'' }}" autocomplete="username" />
+                        {% if errors.username %}<div class="invalid-feedback d-block">{{ errors.username }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_email" class="form-label">Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="id_email" name="email" placeholder="your@email.com" required
+                            value="{{ form.email|default:'' }}" />
+                        {% if errors.email %}<div class="invalid-feedback d-block">{{ errors.email }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_password" class="form-label">Password <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="id_password" name="password" placeholder="Min 8 characters" required minlength="8" autocomplete="new-password" />
+                            <span class="input-group-text password-toggle" onclick="togglePass('id_password', 'eye1')"><i class="fas fa-eye" id="eye1"></i></span>
+                        </div>
+                        {% if errors.password %}<div class="invalid-feedback d-block">{{ errors.password }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_c_password" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="id_c_password" name="c_password" placeholder="Re-enter password" required minlength="8" autocomplete="new-password" />
+                            <span class="input-group-text password-toggle" onclick="togglePass('id_c_password', 'eye2')"><i class="fas fa-eye" id="eye2"></i></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_gender" class="form-label">Gender</label>
+                        <select class="form-select" id="id_gender" name="gender">
+                            <option value="">Select</option>
+                            <option value="Male" {% if form.gender == 'Male' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if form.gender == 'Female' %}selected{% endif %}>Female</option>
+                            <option value="Other" {% if form.gender == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_date_of_birth" class="form-label">Date of Birth</label>
+                        <input type="date" class="form-control" id="id_date_of_birth" name="date_of_birth" value="{{ form.date_of_birth|default:'' }}" />
+                        {% if errors.date_of_birth %}<div class="invalid-feedback d-block">{{ errors.date_of_birth }}</div>{% endif %}
+                    </div>
+                    <div class="col-12">
+                        <label for="id_pan_number" class="form-label">PAN Number <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control text-uppercase" id="id_pan_number" name="pan_number" placeholder="e.g. ABCDE1234F" required maxlength="20"
+                            value="{{ form.pan_number|default:'' }}" />
+                        <small class="text-muted">PAN is used as a unique identifier; one registration per PAN.</small>
+                        {% if errors.pan_number %}<div class="invalid-feedback d-block">{{ errors.pan_number }}</div>{% endif %}
+                    </div>
+                    <div class="col-12">
+                        <label for="id_pan_card" class="form-label">PAN Card document (upload) <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="id_pan_card" name="pan_card" accept=".pdf,.jpg,.jpeg,.png" required />
+                        <small class="text-muted">Upload PAN card (PDF or image). Used for KYC verification.</small>
+                        {% if errors.pan_card %}<div class="invalid-feedback d-block">{{ errors.pan_card }}</div>{% endif %}
+                    </div>
+                    <div class="col-12">
+                        <label for="id_mobile_number" class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="id_mobile_number" name="mobile_number" placeholder="10 digits" required
+                            value="{{ form.mobile_number|default:'' }}" maxlength="15" pattern="\d{10,15}" />
+                        {% if errors.mobile_number %}<div class="invalid-feedback d-block">{{ errors.mobile_number }}</div>{% endif %}
+                    </div>
+                    <div class="col-12">
+                        <label for="id_address" class="form-label">Address <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="id_address" name="address" rows="3" placeholder="Full address" required>{{ form.address|default:'' }}</textarea>
+                        {% if errors.address %}<div class="invalid-feedback d-block">{{ errors.address }}</div>{% endif %}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-register mt-4">Register</button>
+            </form>
+
+            <div class="login-link">
+                Already have an account? <a href="{% url 'login' %}">Sign in here</a>
+            </div>
+        </div>
+    </div>
+
+    <a href="{% url 'index' %}" class="back-to-home" title="Return to home page" style="color:white"><i class="fas fa-arrow-left"></i> Back to Home</a>
+
+    <script>
+        function togglePass(inputId, eyeId) {
+            var input = document.getElementById(inputId);
+            var eye = document.getElementById(eyeId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                eye.classList.remove('fa-eye');
+                eye.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                eye.classList.remove('fa-eye-slash');
+                eye.classList.add('fa-eye');
+            }
+        }
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            var p = document.getElementById('id_password').value;
+            var c = document.getElementById('id_c_password').value;
+            if (p !== c) {
+                e.preventDefault();
+                alert("Password and Confirm Password do not match.");
+                return false;
+            }
+            if (p.length < 8) {
+                e.preventDefault();
+                alert("Password must be at least 8 characters long.");
+                return false;
+            }
+        });
+        var user = sessionStorage.getItem('user');
+        if (user) window.location.href = '/home/';
+    </script>
+</body>
+</html>

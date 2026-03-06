@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f2f6f9;
+            color: #343a40;
+            line-height: 1.6;
+        }
+
+        .payment-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 35px 30px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-container h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #21474b;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            background-color: #fafafa;
+            transition: border 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #21474b;
+            outline: none;
+            box-shadow: 0 0 5px rgba(33, 71, 75, 0.2);
+            background-color: #ffffff;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 30px;
+            background-color: #21474b;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #1b3a3e;
+            transform: scale(1.02);
+        }
+
+        .note {
+            text-align: center;
+            margin-top: 18px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        p {
+            text-align: center;
+            font-size: 16px;
+            margin-top: 10px;
+            color: #444;
+        }
+
+        .readonly-box {
+            padding: 10px 14px;
+            margin: 10px 0;
+            background-color: #e9ecef;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-weight: 500;
+            text-align: left;
+            color: #333;
+        }
+
+        @media screen and (max-width: 768px) {
+            .payment-container {
+                margin: 20px 15px;
+                padding: 25px 20px;
+            }
+
+            input,
+            select,
+            button {
+                font-size: 14px;
+            }
+        }
+    </style>
+
+    <div class="form-display">
+        <label for="loanId">Loan ID:</label>
+        <div class="readonly-box" id="loanId">{{ loan.id }}</div>
+    </div>
+    <div class="form-display">
+        <label for="loanAmount">Amount to Pay:</label>
+        <div class="readonly-box" id="loanAmount">₹{{ monthlyamount }}</div>
+    </div>
+    <div class="payment-container">
+        <h1>Payment</h1>
+        <form method="POST" action="{% url 'payment' %}">
+            {% csrf_token %}
+
+            <input type="hidden" name="id" id="idChecker" value="{{ id }}">
+            <label for="Amount">Amount(₹)</label>
+            <input type="text" id="amount_display" value="₹{{ monthlyamount }}" readonly />
+            <input type="hidden" name="monthlyamount" id="amount" value="{{ monthlyamount }}" />
+            <input type="hidden" name="loan_id" id="loan_id" value="{{ loan.id }}" />
+
+            <label for="method">Payment Method</label>
+            <select id="method" name="method">
+                <option value="">Select</option>
+                <option value="CARD">Card</option>
+                <option value="UPI">Upi</option>
+                <option value="Net Banking">NetBanking</option>
+                <option value="Wallet">Wallet</option>
+            </select>
+
+            <div id="gamechanger">
+
+            </div>
+
+            <button type="submit">Pay Now</button>
+            <div class="note">All transactions are securely encrypted.</div>
+        </form>
+    </div>
+</body>
+
+<script>
+    let ff = document.getElementById('method')
+    let game = document.getElementById("gamechanger")
+    ff.addEventListener('change', () => {
+        console.log(ff.value)
+        switch (ff.value) {
+            case "CARD":
+                game.innerHTML = `<div id="card-fields" >
+                <label for="card_number">Card Number</label>
+                <input type="text" name="card_number" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19" />
+    
+                <label for="expiry">Expiry Date</label>
+                <input type="text" name="expiry" placeholder="MM/YY" maxlength="5" />
+    
+                <label for="cvv">CVV</label>
+                <input type="password" name="cvv" placeholder="XXX" maxlength="3" />
+    
+                <label for="cardholder">Cardholder Name</label>
+                <input type="text" name="cardholder" placeholder="Name on Card" />
+            </div>`
+                break;
+            case "UPI":
+                game.innerHTML = `<div id="upi-fields" >
+                <label for="upi_id">UPI ID</label>
+                <input type="text" name="upi_id" placeholder="example@upi" />
+            </div>`
+                break;
+            case "Net Banking":
+                game.innerHTML = `<div id="netbanking-fields" >
+                <label for="netbanking_acc">NetBanking Account Number</label>
+                <input type="text" name="netbanking_acc" placeholder="Enter your account number" />
+            </div>`
+                break
+            case "Wallet":
+                game.innerHTML = `<div id="wallet-fields">
+                <label for="wallet_name">Wallet Name</label>
+                <input type="text" name="wallet_name" placeholder="Paytm / PhonePe / etc." />
+    
+                <label for="wallet_number">Wallet Number</label>
+                <input type="text" name="wallet_number" placeholder="Enter wallet number" />
+            </div>`
+                break;
+
+            default:
+                game.innerHTML = "<p>Select a Payment method</p>"
+                break;
+        }
+    })
+    // Server session provides user id and loan info; no client-side sessionStorage redirects.
+</script>
+
+</html>

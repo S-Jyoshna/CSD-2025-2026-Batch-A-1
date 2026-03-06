@@ -1,0 +1,112 @@
+{% extends "user/base_user.html" %}
+{# Transactions: extends base_user for consistent layout (prevents shift between pages). #}
+
+{% block title %}Transactions{% endblock %}
+
+{% block extra_css %}
+<style>
+    h2 { text-align: center; color: #21474b; margin-bottom: 20px; }
+    .search-bar { display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 10px; }
+    .search-bar input { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; width: 220px; }
+    .search-btn { background-color: #21474b; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; }
+    .clear-btn { background-color: #6c757d; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08); border-radius: 10px; overflow: hidden; }
+    th, td { padding: 14px; text-align: center; border-bottom: 1px solid #eee; }
+    th { background-color: #21474b; color: white; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    .status-badge { padding: 6px 12px; border-radius: 20px; font-weight: 600; display: inline-block; }
+    .status-success { background-color: #28a745; color: white; }
+    .status-pending { background-color: #fd7e14; color: white; }
+    .status-failed { background-color: #dc3545; color: white; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <h2>Transactions</h2>
+    <div class="search-bar">
+        <input type="text" id="loanSearch" placeholder="Search by Loan ID" />
+        <button class="search-btn" id="searchBtn">Search</button>
+        <button class="clear-btn" id="clearBtn">Clear</button>
+    </div>
+    <table id="transactionsTable">
+        <thead>
+            <tr>
+                <th>Serial Number</th>
+                <th>Loan ID</th>
+                <th>Loan Type</th>
+                <th>Transaction ID</th>
+                <th>Amount Paid</th>
+                <th>Payment Method</th>
+                <th>Date & Time (IST)</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in data %}
+            <tr data-loan-id="{{ transaction.loan_number }}">
+                <td>{{ forloop.counter }}</td>
+                <td>#{{ transaction.loan_number }}</td>
+                <td>{{ transaction.loan_type }}</td>
+                <td>{{ transaction.transaction_number }}</td>
+                <td>₹{{ transaction.monthlyamount }}</td>
+                <td>{{ transaction.method }}</td>
+                <td class="dt-ist" data-timestamp="{{ transaction.transaction_date|date:'c' }}">{{ transaction.transaction_date }}</td>
+                <td>
+                    {% if transaction.status == "Success" %}
+                        <span class="status-badge status-success">Success</span>
+                    {% elif transaction.status == "Pending" %}
+                        <span class="status-badge status-pending">Pending</span>
+                    {% else %}
+                        <span class="status-badge status-failed">{{ transaction.status }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function formatToIST(iso) {
+        try {
+            const d = new Date(iso);
+            const opts = { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: '2-digit', hour: 'numeric', minute: '2-digit', hour12: true };
+            const parts = new Intl.DateTimeFormat('en-IN', opts).formatToParts(d);
+            const get = (t) => parts.find(p => p.type === t)?.value || '';
+            const day = get('day');
+            const month = get('month');
+            const year = get('year');
+            const hour = get('hour');
+            const minute = get('minute');
+            const dayPeriod = get('dayPeriod') || '';
+            return `${day} ${month} ${year}, ${hour}:${minute} ${dayPeriod} IST`.replace(/\s+/g, ' ').trim();
+        } catch (e) {
+            return iso;
+        }
+    }
+    function applyIST() {
+        document.querySelectorAll('.dt-ist').forEach(function(cell) {
+            const ts = cell.getAttribute('data-timestamp') || cell.textContent;
+            cell.textContent = formatToIST(ts);
+        });
+    }
+    function filterByLoanId() {
+        const val = (document.getElementById('loanSearch').value || '').trim();
+        const rows = document.querySelectorAll('#transactionsTable tbody tr');
+        rows.forEach(function(row) {
+            const id = row.getAttribute('data-loan-id') || '';
+            row.style.display = (!val || id === val) ? '' : 'none';
+        });
+    }
+    document.getElementById('searchBtn').addEventListener('click', filterByLoanId);
+    document.getElementById('clearBtn').addEventListener('click', function() {
+        document.getElementById('loanSearch').value = '';
+        filterByLoanId();
+    });
+    document.getElementById('loanSearch').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') filterByLoanId();
+    });
+    applyIST();
+</script>
+{% endblock %}

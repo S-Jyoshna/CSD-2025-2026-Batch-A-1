@@ -1,0 +1,64 @@
+{% extends "user/base_user.html" %}
+{% load static %}
+{# Feedback: extends base_user for consistent layout (prevents shift between pages). #}
+
+{% block title %}Feedback | LoanPortal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header { text-align: center; margin: 10px 0 30px; }
+    .page-header h2 { color: #21474b; font-size: 2rem; margin-bottom: 10px; display: inline-block; }
+    .page-header p { color: #666; max-width: 600px; margin: 0 auto; }
+    .feedback-container { max-width: 800px; margin: 0 auto; }
+    .feedback-card { background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); padding: 30px; margin-bottom: 40px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-weight: 500; margin-bottom: 8px; color: #21474b; }
+    .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 5px; min-height: 150px; resize: vertical; transition: border-color 0.3s ease; }
+    .form-group textarea:focus { border-color: #21474b; outline: none; }
+    .rating-select { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 5px; background-color: white; font-size: 1rem; transition: border-color 0.3s ease; }
+    .rating-select:focus { border-color: #21474b; outline: none; }
+    .submit-btn { background-color: #21474b; color: white; padding: 12px 25px; border: none; border-radius: 5px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+    .submit-btn:hover { background-color: #183639; transform: translateY(-2px); }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="feedback-container">
+        <div class="page-header">
+            <h2>Submit Your Feedback</h2>
+            <p>We value your opinion. Please share your experience with us.</p>
+        </div>
+        <div class="feedback-card">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="message">Your Feedback</label>
+                    <textarea name="message" id="message" required placeholder="Please share your thoughts..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="rating">Rating</label>
+                    <select name="rating" id="rating" class="rating-select">
+                        <option value="5">⭐⭐⭐⭐⭐</option>
+                        <option value="4">⭐⭐⭐⭐</option>
+                        <option value="3">⭐⭐⭐</option>
+                        <option value="2">⭐⭐</option>
+                        <option value="1">⭐</option>
+                    </select>
+                </div>
+                <input type="hidden" name="id" id="sdsdf">
+                <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Submit Feedback</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Keep existing sessionStorage guard (UI/navigation only).
+    let id = "{{ id|default:'' }}";
+    if (id) sessionStorage.setItem('user', id);
+    let user = sessionStorage.getItem('user');
+    if (user == null) window.location.href = '/';
+    document.getElementById("sdsdf").value = user;
+</script>
+{% endblock %}

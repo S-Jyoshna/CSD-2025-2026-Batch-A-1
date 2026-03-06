@@ -1,0 +1,45 @@
+{% extends "admin/base_admin.html" %}
+{# Admin Feedback: extends base_admin for consistent admin navigation/layout. #}
+
+{% block title %}Reviews{% endblock %}
+
+{% block extra_css %}
+<style>
+    h1 { text-align: center; color: var(--primary-color); margin-bottom: 20px; font-size: 26px; }
+    table { width: 100%; margin: 0 auto; border-collapse: collapse; background-color: white; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-radius: 8px; overflow: hidden; }
+    th, td { padding: 14px 20px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+    th { background-color: var(--primary-color); color: white; font-weight: 600;}
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    tr:hover { background-color: #f1f1f1; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <h1>Reviews</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>S. No</th>
+                <th>Customer</th>
+                <th>Rating</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for feedback in data %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ feedback.username__username }}</td>
+                <td>
+                    {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= feedback.rating %} ⭐ {% else %} ☆ {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{{ feedback.message }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No reviews submitted yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends "user/base_user.html" %}
+{# Profile: extends base_user for consistent layout (prevents shift between pages). #}
+
+{% block title %}User Profile | LoanPortal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-content { max-width: 1200px; margin: 10px auto 40px; }
+    .profile-header { text-align: center; margin-bottom: 40px; }
+    .profile-header h1 { color: #21474b; margin-bottom: 15px; font-size: 30px; }
+    .profile-card { background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); padding: 40px; max-width: 500px; margin: 0 auto; text-align: center; position: relative; }
+    .profile-img-container { position: relative; display: inline-block; margin-bottom: 20px; }
+    .profile-img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 5px solid #f8f9fa; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+    .edit-icon { position: absolute; bottom: 10px; right: 10px; background-color: #21474b; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; }
+    .edit-icon:hover { background-color: #3a7d7f; transform: scale(1.1); }
+    .profile-card h2 { font-size: 1.8rem; color: #21474b; margin-bottom: 5px; }
+    .profile-card p { font-size: 1.1rem; color: #3a7d7f; margin-bottom: 25px; }
+    .btn-group { display: flex; gap: 15px; justify-content: center; }
+    .btn { padding: 12px 25px; border: none; border-radius: 5px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-edit { background-color: #21474b; color: white; }
+    .btn-edit:hover { background-color: #3a7d7f; transform: translateY(-2px); }
+    .btn-logout { background-color: #d9534f; color: white; }
+    .btn-logout:hover { background-color: #c9302c; transform: translateY(-2px); }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center; }
+    .modal-content { background-color: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-header h2 { color: #21474b; margin: 0; }
+    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #777; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #21474b; }
+    .form-group input, .form-group textarea { width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 5px; }
+    .file-input { display: none; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px; }
+    .btn-cancel { background-color: #f8f9fa; color: #333; border: 1px solid #ddd; }
+    .btn-cancel:hover { background-color: #e9ecef; }
+    .btn-save { background-color: #5cb85c; color: white; }
+    .btn-save:hover { background-color: #4cae4c; }
+    @media (max-width: 768px) { .profile-card { padding: 30px 20px; } .btn-group { flex-direction: column; } .btn { width: 100%; } }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="profile-content">
+        <div class="profile-header"><h1>USER PROFILE</h1></div>
+        {% if msg %}
+        <div class="alert alert-success" role="alert" style="max-width: 800px; margin: 0 auto 16px;">
+            {{ msg }}
+        </div>
+        {% endif %}
+        {% if error %}
+        <div class="alert alert-danger" role="alert" style="max-width: 800px; margin: 0 auto 16px;">
+            {{ error }}
+        </div>
+        {% endif %}
+        <div class="profile-card">
+            <div class="profile-img-container">
+                <img id="profile_pic" class="profile-img" src="{% if user_obj.profile_pic %}{{ user_obj.profile_pic }}{% else %}https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png{% endif %}" alt="Profile Picture">
+                <div class="edit-icon" onclick="openEditModal()"><i class="fas fa-pencil-alt"></i></div>
+            </div>
+            <h2 id="username">{{ user_obj.username|default:"User" }}</h2>
+            <p id="email">{{ user_obj.email|default:"—" }}</p>
+            <p style="margin-top:-6px; color:#21474b; font-weight:500;">Last Login: {{ last_login_display }}</p>
+            <p style="margin-top:-12px; color:#6c757d; font-size:0.95rem;">
+                {% if user_obj.full_name %}<strong>Name:</strong> {{ user_obj.full_name }}<br>{% endif %}
+                {% if user_obj.mobile_number %}<strong>Mobile:</strong> {{ user_obj.mobile_number }}<br>{% endif %}
+                {% if user_obj.gender %}<strong>Gender:</strong> {{ user_obj.gender }}<br>{% endif %}
+                {% if user_obj.date_of_birth %}<strong>DOB:</strong> {{ user_obj.date_of_birth|date:"Y-m-d" }}<br>{% endif %}
+                {% if user_obj.address %}<strong>Address:</strong> {{ user_obj.address }}<br>{% endif %}
+                {% if user_obj.pan_number %}<strong>PAN:</strong> {{ user_obj.pan_number }}<br>{% endif %}
+                <strong>Verification:</strong> {{ user_obj.verification_status|default:"Pending" }}
+            </p>
+            <div class="btn-group">
+                <button class="btn btn-edit" onclick="openEditModal()"><i class="fas fa-edit"></i> Edit Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Profile</h2>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <!-- Server-side edit form: saves updated data to DB and redirects back with confirmation message -->
+            <form id="profileForm" method="POST" action="{% url 'profile' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="editUsername">Username</label>
+                    <input type="text" id="editUsername" name="username" value="{{ user_obj.username }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail" name="email" value="{{ user_obj.email }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editFullName">Full name</label>
+                    <input type="text" id="editFullName" name="full_name" value="{{ user_obj.full_name|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="editMobile">Mobile number</label>
+                    <input type="text" id="editMobile" name="mobile_number" value="{{ user_obj.mobile_number|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="editGender">Gender</label>
+                    <input type="text" id="editGender" name="gender" value="{{ user_obj.gender|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="editDob">Date of birth</label>
+                    <input type="date" id="editDob" name="date_of_birth" value="{% if user_obj.date_of_birth %}{{ user_obj.date_of_birth|date:'Y-m-d' }}{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label for="editAddress">Address</label>
+                    <textarea id="editAddress" name="address">{{ user_obj.address|default:'' }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Profile Picture</label>
+                    <input type="file" id="profilePicture" name="profile_pic" class="file-input" accept="image/*">
+                    <button type="button" class="btn btn-edit" onclick="document.getElementById('profilePicture').click()"><i class="fas fa-upload"></i> Upload Image</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Keep a client-side copy of user id for other legacy pages that rely on sessionStorage.
+        var id = "{{ id|default:'' }}";
+        if (id) sessionStorage.setItem('user', id);
+
+        document.getElementById('profilePicture').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(event) { document.getElementById('profile_pic').src = event.target.result; }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+    });
+
+    function openEditModal() { document.getElementById('editModal').style.display = 'flex'; }
+    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+
+    // Save is handled server-side by posting the form to the `profile` view.
+</script>
+{% endblock %}

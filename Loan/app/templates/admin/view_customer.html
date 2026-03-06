@@ -1,0 +1,99 @@
+{% extends "admin/base_admin.html" %}
+{% load static %}
+<!-- Admin view: detailed user profile for KYC verification. No password or credentials displayed. -->
+
+{% block title %}View User Details{% endblock %}
+
+{% block extra_css %}
+<style>
+    .customer-wrap { max-width: 1000px; margin: 0 auto; }
+    .back-link { color: var(--primary-color); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .back-link:hover { text-decoration: underline; }
+    .cards { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    .card { background: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); overflow: hidden; }
+    .card-header { background: var(--primary-color); color: white; font-weight: 600; padding: 12px 16px; }
+    .card-body { padding: 0; }
+    .detail { display: grid; grid-template-columns: 260px 1fr; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #eee; }
+    .detail:last-child { border-bottom: none; }
+    .label { color: #444; font-weight: 600; }
+    .value { color: #222; }
+    .btn-linkish { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; text-decoration: none; color: var(--primary-color); margin-right: 8px; }
+    .btn-linkish:hover { background: #f8f9fa; }
+    .actions { display: flex; gap: 10px; margin-top: 12px; }
+    .btn { padding: 10px 14px; border: none; border-radius: 6px; cursor: pointer; }
+    .btn-approve { background-color: #28a745; color: #fff; }
+    .btn-reject { background-color: #dc3545; color: #fff; }
+    .reject-reason { width: 100%; max-width: 420px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-top: 8px; }
+    @media (max-width: 768px) {
+        .detail { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="customer-wrap">
+        {% if show_verification_actions %}
+            <p style="margin-bottom: 16px;">
+                <a href="{% url 'admin_dashboard' %}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            </p>
+            <div class="card">
+                <div class="card-header">Pending User Registration Details</div>
+                <div class="card-body">
+                    <div class="detail"><div class="label">Full Name</div><div class="value">{{ customer.full_name|default:"—" }}</div></div>
+                    <div class="detail"><div class="label">Username</div><div class="value">{{ customer.username }}</div></div>
+                    <div class="detail"><div class="label">Email</div><div class="value">{{ customer.email }}</div></div>
+                    <div class="detail"><div class="label">Gender</div><div class="value">{{ customer.gender|default:"—" }}</div></div>
+                    <div class="detail"><div class="label">Date of Birth</div><div class="value">{% if customer.date_of_birth %}{{ customer.date_of_birth|date:"Y-m-d" }}{% else %}—{% endif %}</div></div>
+                    <div class="detail"><div class="label">Mobile Number</div><div class="value">{{ customer.mobile_number|default:"—" }}</div></div>
+                    <div class="detail"><div class="label">PAN Number</div><div class="value">{{ customer.pan_number|default:"—" }}</div></div>
+                    <div class="detail"><div class="label">PAN Document</div>
+                        <div class="value">
+                            {% if customer.pan_card_document %}
+                                <a href="{{ customer.pan_card_document }}" target="_blank" class="btn-linkish"><i class="fas fa-external-link-alt"></i> View</a>
+                            {% else %}—{% endif %}
+                        </div>
+                    </div>
+                    <div class="detail"><div class="label">Address</div><div class="value">{{ customer.address|default:"—" }}</div></div>
+                    <div class="actions" style="padding: 14px 16px;">
+                        <form method="POST" action="{% url 'approve_user' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ personal.user_id }}" />
+                            <textarea name="reason" class="reject-reason" placeholder="Approval notes (optional)"></textarea>
+                            <button type="submit" class="btn btn-approve"><i class="fas fa-check"></i> Approve</button>
+                        </form>
+                        <form method="POST" action="{% url 'reject_user' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ personal.user_id }}" />
+                            <textarea name="reason" class="reject-reason" placeholder="Enter rejection reason" required></textarea>
+                            <button type="submit" class="btn btn-reject"><i class="fas fa-times"></i> Reject</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p style="margin-bottom: 16px;">
+                <a href="{% url 'managecustomer' %}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Manage Customers</a>
+            </p>
+            <div class="card">
+                <div class="card-header">Customer Details</div>
+                <div class="card-body">
+                    <div class="detail"><div class="label">User ID</div><div class="value">{{ personal.user_id }}</div></div>
+                    <div class="detail"><div class="label">Full Name</div><div class="value">{{ personal.full_name|default:"—" }}</div></div>
+                    <div class="detail"><div class="label">Username</div><div class="value">{{ personal.username }}</div></div>
+                    <div class="detail"><div class="label">Email</div><div class="value">{{ personal.email }}</div></div>
+                    <div class="detail"><div class="label">Mobile Number</div><div class="value">{{ personal.phone|default:"—" }}</div></div>
+                    <div class="detail"><div class="label">PAN Number</div><div class="value">{{ customer.pan_number|default:"—" }}</div></div>
+                    <div class="detail"><div class="label">Verification Status</div><div class="value">{{ personal.verification_status }}</div></div>
+                    <div class="detail"><div class="label">Account Status</div><div class="value">{{ personal.account_status }}</div></div>
+                    <div class="detail"><div class="label">PAN Document</div>
+                        <div class="value">
+                            {% if customer.pan_card_document %}
+                                <a href="{{ customer.pan_card_document }}" target="_blank" class="btn-linkish"><i class="fas fa-external-link-alt"></i> View</a>
+                            {% else %}—{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

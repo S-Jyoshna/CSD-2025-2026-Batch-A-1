@@ -1,0 +1,67 @@
+{% extends "admin/base_admin.html" %}
+{# Admin Profile: extends base_admin for consistent admin navigation/layout. #}
+
+{% block title %}Admin Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-content { max-width: 1200px; margin: 10px auto 40px; }
+    .profile-header { text-align: center; margin-bottom: 40px; }
+    .profile-header h1 { color: var(--primary-color); margin-bottom: 15px; font-size: 30px; }
+    .profile-card { background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); padding: 40px; max-width: 500px; margin: 0 auto; text-align: center; position: relative; }
+    .profile-info { margin-bottom: 30px; }
+    .btn { padding: 12px 25px; border: none; border-radius: 5px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-logout { background-color: #d9534f; color: white; }
+    .btn-logout:hover { background-color: #c9302c; transform: translateY(-2px); }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center; }
+    .modal-content { background-color: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .notification { position: fixed; top: 20px; right: 20px; padding: 15px 20px; border-radius: 5px; color: white; font-weight: 500; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); display: none; z-index: 3000; }
+    .notification.success { background-color: #5cb85c; }
+    .notification.error { background-color: #d9534f; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="profile-content">
+        <div class="profile-header"><h1>ADMIN PROFILE</h1></div>
+        <div class="profile-card">
+            <div class="profile-info">
+                <h2 id="username">Loading...</h2>
+                <p id="email">Loading...</p>
+                <p id="last-login">Last login: <span id="lastLoginValue">Loading...</span></p>
+            </div>
+            <button class="btn btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let adminData = {};
+    document.addEventListener('DOMContentLoaded', function () {
+        loadAdminProfile();
+    });
+    function loadAdminProfile() {
+        // Demo-only UI data (kept as-is); this refactor is layout/navigation only.
+        setTimeout(() => {
+            adminData = { id: 1, username: 'admin', email: 'admin@gmail.com', lastLogin: new Date().toLocaleString() };
+            document.getElementById('username').textContent = adminData.username;
+            document.getElementById('email').textContent = adminData.email;
+            document.getElementById('lastLoginValue').textContent = adminData.lastLogin;
+        }, 200);
+    }
+    function logout() {
+        showNotification('Logging out...', 'success');
+        setTimeout(() => { sessionStorage.clear(); window.location.href = '/'; }, 600);
+    }
+    function showNotification(message, type) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
+        setTimeout(() => { notification.style.display = 'none'; }, 2000);
+    }
+</script>
+{% endblock %}

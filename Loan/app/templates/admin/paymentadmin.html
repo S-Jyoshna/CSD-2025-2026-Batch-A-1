@@ -1,0 +1,91 @@
+{% extends "admin/base_admin.html" %}
+{# Payment Admin: extends base_admin for consistent admin navigation/layout. #}
+
+{% block title %}Payment Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    h2 { text-align: center; color: var(--primary-color); margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08); }
+    th { background-color: var(--primary-color); color: white; font-weight: 600; padding: 14px; text-transform: uppercase; letter-spacing: 0.5px; font-size: 14px; }
+    td { padding: 16px 12px; text-align: left; font-size: 15px; color: #333; border-bottom: 1px solid #e0e0e0; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    tr:hover { background-color: #eef4f8; transition: background 0.3s ease; }
+    .btn { padding: 8px 14px; font-size: 13px; border: none; border-radius: 20px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-block; }
+    .status-completed { background-color: #28a745; color: white; }
+    .status-pending { background-color: #ffc107; color: #212529; }
+    .status-failed { background-color: #dc3545; color: white; }
+    .btn:hover { opacity: 0.9; transform: scale(1.03); }
+    @media screen and (max-width: 768px) {
+        table, thead, tbody, th, td, tr { display: block; }
+        thead { display: none; }
+        tr { margin-bottom: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); padding: 10px; }
+        td { text-align: right; position: relative; padding-left: 50%; border: none; }
+        td::before { content: attr(data-label); position: absolute; left: 15px; width: 45%; font-weight: bold; color: #555; text-align: left; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <h2>Payment Transactions</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Date & Time (IST)</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in data %}
+            <tr>
+                <td data-label="Transaction ID">{{ transaction.transaction_number }}</td>
+                <td data-label="Customer">{{ transaction.username }}</td>
+                <td data-label="Amount">₹{{ transaction.monthlyamount }}</td>
+                <td data-label="Method">{{ transaction.method }}</td>
+                <td data-label="Date & Time (IST)" class="dt-ist" data-timestamp="{{ transaction.transaction_date|date:'c' }}">{{ transaction.transaction_date }}</td>
+                <td data-label="Status">
+                    {% if transaction.status == "Success" %}
+                        <span class="btn status-completed">Success</span>
+                    {% elif transaction.status == "Failed" %}
+                        <span class="btn status-failed">Failed</span>
+                    {% else %}
+                        <span class="btn status-pending">Pending</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function formatToIST(iso) {
+        try {
+            const d = new Date(iso);
+            const opts = { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: '2-digit', hour: 'numeric', minute: '2-digit', hour12: true };
+            const parts = new Intl.DateTimeFormat('en-IN', opts).formatToParts(d);
+            const get = (t) => parts.find(p => p.type === t)?.value || '';
+            const day = get('day');
+            const month = get('month');
+            const year = get('year');
+            const hour = get('hour');
+            const minute = get('minute');
+            const dayPeriod = get('dayPeriod') || '';
+            return `${day} ${month} ${year}, ${hour}:${minute} ${dayPeriod} IST`.replace(/\s+/g, ' ').trim();
+        } catch (e) {
+            return iso;
+        }
+    }
+    (function applyIST(){
+        document.querySelectorAll('.dt-ist').forEach(function(cell) {
+            const ts = cell.getAttribute('data-timestamp') || cell.textContent;
+            cell.textContent = formatToIST(ts);
+        });
+    })();
+</script>
+{% endblock %}

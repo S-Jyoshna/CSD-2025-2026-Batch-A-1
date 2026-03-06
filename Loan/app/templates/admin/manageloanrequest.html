@@ -1,0 +1,77 @@
+{% extends "admin/base_admin.html" %}
+{# Manage Loan Requests: extends base_admin for consistent admin navigation/layout. #}
+
+{% block title %}Manage Loan Requests{% endblock %}
+
+{% block extra_css %}
+<style>
+    h2 { text-align: center; margin-bottom: 30px; color: var(--primary-color); }
+    table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background-color: var(--primary-color); color: white; }
+    tr:hover { background-color: #f1f1f1; }
+    .btn { padding: 6px 10px; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; margin: 0 2px; }
+    .view-btn { background-color: #007bff; color: white; }
+    .reject-btn { background-color: #dc3545; color: white; }
+    .badge { display: inline-block; padding: 6px 10px; border-radius: 16px; font-size: 12px; }
+    .badge-pending { background-color: #ffc107; color: #212529; }
+    .status-approved { color: #212529; font-weight: 600; }
+    .status-rejected { color: #dc3545; font-weight: 600; }
+    .status-completed { color: #28a745; font-weight: 600; }
+    .status-pending { color: #6c757d; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <h2>Manage Loan Requests</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Loan ID</th>
+                <th>Customer Name</th>
+                <th>Loan Type</th>
+                <th>Amount</th>
+                <th>Monthly Amount</th>
+                <th>Duration</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for loan in data %}
+            <tr>
+                <td>{{ loan.loan_number }}</td>
+                <td>{{ loan.customer_name }}</td>
+                <td>{{ loan.loan_details }}</td>
+                <td>₹{{ loan.amount }}</td>
+                <td>₹{{ loan.monthlyamount }}</td>
+                <td>{{ loan.duration }}</td>
+                <td>
+                    {% if loan.status == 'Rejected' %}
+                        <span class="status-badge rejected">Rejected</span>
+                    {% elif loan.status == 'Completed' %}
+                        <span class="status-badge completed">Completed</span>
+                    {% elif loan.status == 'Pending' %}
+                        <span class="status-badge pending">Pending</span>
+                    {% else %}
+                        <span class="status-badge approved">Approved</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a class="btn view-btn" href="{% url 'admin_view_loan' loan.id %}?from=manage">View</a>
+                    <form method="POST" action="{% url 'rejectloan' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value="{{ loan.id }}">
+                        <input type="hidden" name="reason" value="Rejected via Manage Loan Requests">
+                        <button type="submit" class="btn reject-btn">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block extra_js %}
+    <script></script>
+{% endblock %}

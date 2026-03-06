@@ -1,0 +1,73 @@
+{% extends "admin/base_admin.html" %}
+{% load static %}
+{# Manage Customer: extends base_admin for consistent sidebar. Status = Pending / Approved / Rejected only; action = Reject (no Block). #}
+
+{% block title %}Manage Customer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    h2 { color: #21474b; margin: 0; font-size: 28px; font-weight: 600; text-align: left; }
+    table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border-radius: 8px; overflow: hidden; }
+    th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background-color: #21474b; color: white; font-weight: 500; text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px; }
+    tr:hover { background-color: #f8f9fa; }
+    .status { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; display: inline-block; }
+    .status-approved { background-color: #e6f7e6; color: #28a745; }
+    .status-pending { background-color: #fff3cd; color: #ffc107; }
+    .status-blocked { background-color: #fdecea; color: #dc3545; }
+    .btn { padding: 8px 12px; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 5px; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
+    .view-btn { background-color: #007bff; color: white; text-decoration: none; }
+    .pagination { display: flex; justify-content: center; margin-top: 30px; gap: 10px; }
+    .pagination a { padding: 8px 15px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #21474b; transition: all 0.3s; }
+    .pagination a.active { background-color: #21474b; color: white; border-color: #21474b; }
+    .pagination a:hover:not(.active) { background-color: #f1f1f1; }
+    @media (max-width: 768px) { .header { flex-direction: column; gap: 15px; } table { display: block; overflow-x: auto; } }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="header">
+        <h2>Customer Management</h2>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Verification Status</th>
+                <th>View</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in data %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ customer.username }}</td>
+                <td>{{ customer.email }}</td>
+                <td>
+                    {% if customer.verification_status == 'Approved' %}
+                    <span class="status status-approved"><i class="fas fa-check-circle"></i> Approved</span>
+                    {% elif customer.verification_status == 'Rejected' %}
+                    <span class="status status-blocked"><i class="fas fa-times-circle"></i> Rejected</span>
+                    {% else %}
+                    <span class="status status-pending"><i class="fas fa-clock"></i> Pending</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'admin_view_customer' customer.id %}" class="btn view-btn"><i class="fas fa-eye"></i> View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="pagination">
+        <a href="#">&laquo;</a>
+        <a href="#" class="active">1</a>
+        <a href="#">2</a>
+        <a href="#">3</a>
+        <a href="#">&raquo;</a>
+    </div>
+{% endblock %}
